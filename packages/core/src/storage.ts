@@ -23,7 +23,8 @@ export async function writeJson<T>(adapter: StorageAdapter, key: string, value: 
 }
 
 export async function readCollection<T>(adapter: StorageAdapter, key: string): Promise<T[]> {
-  return readJson<T[]>(adapter, key, []);
+  const stored = await readJson<unknown>(adapter, key, []);
+  return Array.isArray(stored) ? (stored as T[]) : [];
 }
 
 export async function appendCollectionItem<T>(
