@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "ThoroughLoop",
+    "slug": "thoroughloop",
+    "scheme": "thoroughloop",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#fbfaf7"
+      }
+    },
+    "plugins": ["expo-router"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@thoroughloop/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "lint": "eslint app src --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "NEXT_IGNORE_INCORRECT_LOCKFILE=1 next build"
+  },
+  "dependencies": {
+    "@thoroughloop/core": "*",
+    "@thoroughloop/ui": "*",
+    "next": "^16.2.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}
