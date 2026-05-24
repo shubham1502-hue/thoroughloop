@@ -1,5 +1,7 @@
 # ThoroughLoop
 
+[![CI](https://github.com/shubham1502-hue/thoroughloop/actions/workflows/ci.yml/badge.svg)](https://github.com/shubham1502-hue/thoroughloop/actions/workflows/ci.yml)
+
 ThoroughLoop is a web-first founder operating diagnosis tool that turns messy founder context into one memo, one founder action, and one decision to review next week.
 
 ## Why This Exists
