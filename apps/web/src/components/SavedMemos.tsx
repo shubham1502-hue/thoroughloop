@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   STORAGE_KEYS,
@@ -120,9 +121,22 @@ export function SavedMemos() {
             </article>
           ))}
         </div>
+      ) : memos.length ? (
+        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+          <p className="font-semibold text-ink">No memos match the current filters.</p>
+          <p>This page stores saved founder memos from completed diagnoses. Clear the search or workflow filter to review the saved memo library.</p>
+        </div>
       ) : (
-        <div className="rounded-lg border border-line bg-white p-6 text-muted">
-          No memos yet. Start with a messy diagnosis from the homepage.
+        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+          <p className="font-semibold text-ink">No memos saved yet.</p>
+          <p>This page stores founder memos after a diagnosis is generated. It is empty because no memo has been saved on this device yet.</p>
+          <p>
+            Start with a messy diagnosis from the{" "}
+            <Link href="/" className="font-semibold text-forest underline underline-offset-4">
+              homepage
+            </Link>
+            .
+          </p>
         </div>
       )}
     </div>

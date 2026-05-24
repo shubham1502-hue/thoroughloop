@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_SETTINGS,
@@ -196,7 +197,17 @@ function PreviousDecisionReview() {
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-muted">No previous founder decision saved yet. Generate your first diagnosis from the homepage.</p>
+        <div className="mt-4 grid gap-2 text-muted">
+          <p className="font-semibold text-ink">No previous founder decision saved yet.</p>
+          <p>This section recalls the latest saved decision for weekly review. It is empty because no decision has been saved on this device yet.</p>
+          <p>
+            Generate your first diagnosis from the{" "}
+            <Link href="/" className="font-semibold text-forest underline underline-offset-4">
+              homepage
+            </Link>
+            .
+          </p>
+        </div>
       )}
     </section>
   );
