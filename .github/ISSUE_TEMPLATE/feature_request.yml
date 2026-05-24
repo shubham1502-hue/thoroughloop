@@ -1,0 +1,49 @@
+name: Feature request
+description: Suggest a focused improvement for ThoroughLoop.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ThoroughLoop is a web-first founder operating diagnosis MVP. Requests should preserve the core loop: paste context, diagnose, generate one memo, save one founder action, save one decision, and review later.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Founder problem
+      description: What founder or operator problem would this solve?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Web MVP
+        - Core diagnosis logic
+        - Local persistence
+        - Workflow route
+        - Mobile skeleton
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should change?
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Product boundary
+      description: Confirm this does not turn ThoroughLoop into a CRM, project management suite, or dashboard-heavy tool.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: How to validate
+      description: What should be tested after the change?
