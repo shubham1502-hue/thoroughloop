@@ -1,58 +1,107 @@
 # ThoroughLoop
 
-ThoroughLoop turns scattered founder notes into one diagnosis, one founder action, and one decision to review next week.
+ThoroughLoop is a web-first founder operating diagnosis tool that turns messy founder context into one memo, one founder action, and one decision to review next week.
 
-## What ThoroughLoop is
+## Why This Exists
 
-ThoroughLoop is a lightweight operating diagnosis tool for early-stage founders. Paste messy deal notes, weekly updates, customer blockers, investor notes, hiring notes, or founder reflections. The app detects the workflow, extracts operating signals, generates a founder-ready memo, saves one founder action, and records one decision to review next week.
+Early-stage founders often churn from project management systems, dashboards, CRMs, spreadsheets, and heavy workspaces because those tools require setup, data hygiene, and ongoing maintenance before they provide judgment.
 
-## Why it exists
+ThoroughLoop keeps the loop smaller:
 
-Early-stage founders do not need another project management system, dashboard, CRM, or workspace to maintain. They need a simple weekly loop that accepts messy context and turns it into operating judgment.
+1. Paste messy founder context.
+2. Detect the workflow.
+3. Extract operating signals.
+4. Generate a founder memo.
+5. Save one founder action.
+6. Save one decision.
+7. Review the decision next week.
 
-## How to run the web app
+## What It Does Today
 
-Use Node.js 20.19 or newer.
+- Runs a production-minded web MVP in `apps/web`.
+- Detects five workflows: Revenue Rescue, Weekly Operating Review, Investor Update, Onboarding Risk, and Hiring Bottleneck.
+- Uses deterministic client-side logic in `packages/core`.
+- Generates editable founder memos without requiring structured forms first.
+- Saves memos, founder actions, decisions, and settings to local storage through storage adapters.
+- Recalls the latest saved decision on the weekly review workflow.
+- Includes an Expo mobile skeleton for later reuse of shared core logic.
+
+## What It Does Not Do Yet
+
+- No backend.
+- No auth.
+- No database.
+- No payments.
+- No external integrations.
+- No server-side AI calls.
+- No team workspace.
+- No production sync across devices.
+
+Current data is local to the browser or device. Clearing browser storage may remove saved memos, founder actions, decisions, and settings.
+
+## Repo Structure
+
+```text
+apps/
+  web/       Next.js web MVP
+  mobile/    Expo skeleton
+packages/
+  core/      Product logic, types, storage helpers, workflow detection, memo generation
+  ui/        Shared design tokens
+docs/        Product, mobile, and handoff documentation
+```
+
+## Local Development
+
+Use Node 20.19 or newer.
 
 ```bash
-npm install
+npm ci
 npm run dev:web
 ```
 
 Then open `http://localhost:3000`.
 
-## How to run tests
-
-```bash
-npm run test
-```
-
-The current test command runs the TypeScript checks across the monorepo. Browser validation should also follow the checklist in `PROJECT_HANDOFF.md`.
-
-## How to lint
+## Scripts
 
 ```bash
 npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run test:e2e
 ```
 
-## How to build
+`npm run test` runs the core test suite. `npm run test:e2e` runs the Playwright smoke test for the main browser loop.
+
+## Validation
+
+Before pushing changes, run:
 
 ```bash
+npm run lint
+npm run typecheck
+npm run test
 npm run build
+git diff --check
 ```
 
-The root build runs available package builds first, then the web build. The mobile app is a skeleton and does not ship a production build script in v1.
+For browser-loop validation, also run:
 
-## Current limitations
+```bash
+npm run test:e2e
+```
 
-V1 uses local browser or device storage. Data is device-specific. There is no backend, auth, database, payment system, external integration, or server-side AI call.
+Manual browser validation is documented in `docs/manual-smoke-test.md`.
 
-Production should later add database persistence, auth, real LLM generation, workspace support, and integrations.
+## Public-Safe Boundary
 
-## Future mobile path
+This repository uses synthetic examples and local-first persistence. It does not claim production usage, customers, revenue impact, deployment, compliance readiness, or external data integrations.
 
-The repo includes an Expo skeleton at `apps/mobile`. It is set up to reuse `packages/core` later. The mobile roadmap is documented in `docs/mobile-roadmap.md`.
+## Roadmap
 
-## GitHub-ready project description
+Near-term work should harden the web MVP, improve synthetic examples, refine export or share paths for memos, and improve review cadence. Later work can evaluate auth, database persistence, team workspace support, integrations, server-side AI, and a full mobile app after product validation.
 
-ThoroughLoop is a web-first, mobile-ready founder operating loop that turns messy founder context into a diagnosis, one founder action, and one decision to review next week.
+## GitHub Project Description
+
+A web-first founder operating diagnosis tool that turns messy founder context into one memo, one action, and one decision to review next week.
