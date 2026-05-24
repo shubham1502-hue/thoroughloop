@@ -12,7 +12,7 @@
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "test": "npm run typecheck"
+    "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@types/node": "^20.17.10",
@@ -25,6 +25,7 @@
     "eslint-config-next": "^16.2.6",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.22.3",
     "typescript": "^5.7.2"
   },
   "engines": {
