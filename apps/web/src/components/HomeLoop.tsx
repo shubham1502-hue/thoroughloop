@@ -95,6 +95,7 @@ export function HomeLoop() {
         <label className="grid gap-3">
           <span className="text-sm font-semibold">Messy founder context</span>
           <textarea
+            data-testid="messy-context-input"
             value={rawInput}
             onChange={(event) => setRawInput(event.target.value)}
             rows={9}
