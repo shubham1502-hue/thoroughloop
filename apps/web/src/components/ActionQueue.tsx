@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   STORAGE_KEYS,
@@ -189,9 +190,22 @@ export function ActionQueue() {
             </article>
           ))}
         </div>
+      ) : actions.length ? (
+        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+          <p className="font-semibold text-ink">No founder actions match the current filters.</p>
+          <p>This page keeps the one founder action saved from each memo. Clear the filters to return to the full founder action queue.</p>
+        </div>
       ) : (
-        <div className="rounded-lg border border-line bg-white p-6 text-muted">
-          No founder actions yet. Generate your first memo to create one.
+        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+          <p className="font-semibold text-ink">No founder actions saved yet.</p>
+          <p>This page tracks one founder action per saved memo. It is empty because no founder action has been saved on this device yet.</p>
+          <p>
+            Generate a founder memo from the{" "}
+            <Link href="/" className="font-semibold text-forest underline underline-offset-4">
+              homepage
+            </Link>{" "}
+            and save its founder action.
+          </p>
         </div>
       )}
     </div>

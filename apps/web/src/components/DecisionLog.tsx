@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   STORAGE_KEYS,
@@ -129,8 +130,16 @@ export function DecisionLog() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-line bg-white p-6 text-muted">
-          No decisions saved yet. Generate your first founder memo.
+        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+          <p className="font-semibold text-ink">No decisions saved yet.</p>
+          <p>This page stores the decision to review next week after a founder memo is generated. It is empty because no decision has been saved on this device yet.</p>
+          <p>
+            Generate a founder memo from the{" "}
+            <Link href="/" className="font-semibold text-forest underline underline-offset-4">
+              homepage
+            </Link>{" "}
+            and save its decision.
+          </p>
         </div>
       )}
     </div>

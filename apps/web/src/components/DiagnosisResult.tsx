@@ -43,7 +43,7 @@ export function DiagnosisPreview({
   onGenerateMemo: () => void;
 }) {
   return (
-    <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+    <section data-testid="diagnosis-preview" className="rounded-lg border border-line bg-white p-5 shadow-soft">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-sm font-semibold text-muted">Diagnosis preview</p>
@@ -112,7 +112,7 @@ export function EditableMemo({
   }
 
   return (
-    <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+    <section data-testid="founder-memo" className="rounded-lg border border-line bg-white p-5 shadow-soft">
       <div className="flex flex-col gap-2 border-b border-line pb-4">
         <p className="text-sm font-semibold text-muted">Founder memo</p>
         <input
@@ -230,13 +230,28 @@ export function SaveActions({
   return (
     <div className="rounded-lg border border-line bg-paper p-4">
       <div className="flex flex-wrap gap-3">
-        <button type="button" onClick={onSaveMemo} className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white">
+        <button
+          type="button"
+          data-testid="save-memo"
+          onClick={onSaveMemo}
+          className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white"
+        >
           Save memo
         </button>
-        <button type="button" onClick={onSaveAction} className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold">
+        <button
+          type="button"
+          data-testid="save-founder-action"
+          onClick={onSaveAction}
+          className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold"
+        >
           Save founder action
         </button>
-        <button type="button" onClick={onSaveDecision} className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold">
+        <button
+          type="button"
+          data-testid="save-decision"
+          onClick={onSaveDecision}
+          className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold"
+        >
           Save decision
         </button>
       </div>
