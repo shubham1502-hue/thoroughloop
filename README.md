@@ -4,6 +4,14 @@
 
 ThoroughLoop is a web-first founder operating diagnosis tool that turns messy founder context into one memo, one founder action, and one decision to review next week.
 
+## Live demo
+
+The web MVP is deployed on Vercel:
+
+https://thoroughloop.vercel.app
+
+The current version is local-first. Saved memos, actions, decisions, and settings are stored in the browser through the preserved Founder OS Lite storage keys.
+
 ## Why This Exists
 
 Early-stage founders often churn from project management systems, dashboards, CRMs, spreadsheets, and heavy workspaces because those tools require setup, data hygiene, and ongoing maintenance before they provide judgment.
