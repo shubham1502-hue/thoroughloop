@@ -10,6 +10,12 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "@expo/*"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-gesture-handler"
+      - dependency-name: "react-native-safe-area-context"
 
   - package-ecosystem: "github-actions"
     directory: "/"
