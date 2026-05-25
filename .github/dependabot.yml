@@ -13,6 +13,7 @@ updates:
     ignore:
       - dependency-name: "expo"
       - dependency-name: "@expo/*"
+      - dependency-name: "expo-router"
       - dependency-name: "react-native"
       - dependency-name: "react-native-gesture-handler"
       - dependency-name: "react-native-safe-area-context"
