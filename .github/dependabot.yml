@@ -17,6 +17,7 @@ updates:
       - dependency-name: "react-native"
       - dependency-name: "react-native-gesture-handler"
       - dependency-name: "react-native-safe-area-context"
+      - dependency-name: "react-native-screens"
 
   - package-ecosystem: "github-actions"
     directory: "/"
