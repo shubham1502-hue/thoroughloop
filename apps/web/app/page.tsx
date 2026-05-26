@@ -20,24 +20,24 @@ export default function HomePage() {
   return (
     <>
       <HomeLoop />
-      <section className="border-t border-line bg-white">
+      <section className="border-t border-white/10 bg-night-soft text-slate-100">
         <div className="mx-auto grid max-w-6xl gap-6 px-5 py-12 md:px-8">
-          <h2 className="text-2xl font-semibold">Why founders churn from other tools</h2>
+          <h2 className="text-2xl font-semibold text-white">Why founders churn from other tools</h2>
           <div className="grid gap-3 md:grid-cols-5">
             {churnReasons.map((reason) => (
-              <div key={reason} className="rounded-lg border border-line bg-paper p-4">
+              <div key={reason} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-semibold">{reason}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-      <section className="bg-paper">
+      <section className="bg-night text-slate-100">
         <div className="mx-auto grid max-w-6xl gap-6 px-5 py-12 md:px-8">
-          <h2 className="text-2xl font-semibold">What ThoroughLoop does instead</h2>
+          <h2 className="text-2xl font-semibold text-white">What ThoroughLoop does instead</h2>
           <div className="grid gap-3 md:grid-cols-5">
             {thoroughLoopActions.map((action) => (
-              <div key={action} className="rounded-lg border border-line bg-white p-4">
+              <div key={action} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
                 <p className="font-semibold">{action}</p>
               </div>
             ))}

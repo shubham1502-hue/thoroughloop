@@ -13,7 +13,12 @@ const config: Config = {
         ink: "#171717",
         muted: "#5f5a52",
         line: "#ded8cc",
-        forest: "#2f4f46"
+        forest: "#2f4f46",
+        night: "#071016",
+        "night-soft": "#0d1820",
+        "night-card": "#101e28",
+        cyan: "#22d3ee",
+        "cyan-soft": "#a5f3fc"
       },
       fontFamily: {
         sans: [
@@ -27,7 +32,8 @@ const config: Config = {
         ]
       },
       boxShadow: {
-        soft: "0 12px 30px rgba(23, 23, 23, 0.06)"
+        soft: "0 12px 30px rgba(23, 23, 23, 0.06)",
+        "dark-soft": "0 24px 70px rgba(0, 0, 0, 0.32)"
       }
     }
   },
