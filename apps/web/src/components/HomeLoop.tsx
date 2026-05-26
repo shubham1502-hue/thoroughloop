@@ -20,6 +20,8 @@ import { webLocalStorageAdapter } from "@/storage/webLocalStorageAdapter";
 const sampleContext =
   "FinCore Labs has been stuck in negotiation for 21 days after raising a pricing concern. BrightLayer AI has not replied after proposal for 12 days. Northstar Ops completed demo but is waiting for internal review. Founder follow-up is slipping and proposal-stage deals need attention this week.";
 
+const valueStrip = ["1 diagnosis", "1 founder action", "1 decision"];
+
 export function HomeLoop() {
   const [rawInput, setRawInput] = useState("");
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -80,61 +82,70 @@ export function HomeLoop() {
   }
 
   return (
-    <section className="mx-auto grid max-w-5xl gap-6 px-5 py-10 md:px-8 md:py-14">
-      <div className="grid gap-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">ThoroughLoop</p>
-        <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-normal md:text-6xl">
-          Paste messy founder context. Close the loop.
-        </h1>
-        <p className="max-w-3xl text-lg leading-8 text-muted">
-          ThoroughLoop turns scattered founder notes into one diagnosis, one founder action, and one decision to review next week.
-        </p>
-      </div>
-
-      <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
-        <label className="grid gap-3">
-          <span className="text-sm font-semibold">Messy founder context</span>
-          <textarea
-            data-testid="messy-context-input"
-            value={rawInput}
-            onChange={(event) => setRawInput(event.target.value)}
-            rows={9}
-            placeholder="Paste deal notes, weekly updates, CRM exports, customer blockers, investor notes, hiring notes, or founder reflections here."
-            className="min-h-[240px] rounded-lg border border-line bg-paper px-4 py-3 text-base leading-7 outline-none transition focus:border-forest focus:ring-2 focus:ring-forest/15"
-          />
-        </label>
-        <p className="mt-3 text-sm text-muted">Paste at least one messy note, or try the sample diagnosis.</p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={trySampleDiagnosis}
-            className="rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold transition hover:border-forest"
-          >
-            Try sample diagnosis
-          </button>
-          <button
-            type="button"
-            onClick={() => runDiagnosis(rawInput)}
-            disabled={!rawInput.trim()}
-            className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#203832] disabled:cursor-not-allowed disabled:bg-[#9a9a92]"
-          >
-            Diagnose this mess
-          </button>
+    <section className="border-b border-white/10 bg-night text-white">
+      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 md:px-8 md:py-16">
+        <div className="grid gap-5">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-cyan">ThoroughLoop</p>
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] tracking-normal md:text-7xl">
+            Paste messy founder context. Close the loop.
+          </h1>
+          <p className="max-w-3xl text-lg leading-8 text-slate-300 md:text-xl">
+            ThoroughLoop turns scattered founder notes into one diagnosis, one founder action, and one decision to review next week.
+          </p>
+          <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
+            {valueStrip.map((item) => (
+              <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-cyan-soft">{item}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {diagnosis ? <DiagnosisPreview diagnosis={diagnosis} onGenerateMemo={generateMemo} /> : null}
-      {memo ? (
-        <div className="grid gap-4">
-          <EditableMemo memo={memo} onChange={setMemo} />
-          <SaveActions
-            confirmation={confirmation}
-            onSaveMemo={saveMemo}
-            onSaveAction={saveFounderAction}
-            onSaveDecision={saveDecision}
-          />
+        <div className="rounded-lg border border-white/10 bg-night-card p-5 shadow-dark-soft md:p-6">
+          <label className="grid gap-3">
+            <span className="text-sm font-semibold text-slate-100">Messy founder context</span>
+            <textarea
+              data-testid="messy-context-input"
+              value={rawInput}
+              onChange={(event) => setRawInput(event.target.value)}
+              rows={9}
+              placeholder="Paste deal notes, weekly updates, CRM exports, customer blockers, investor notes, hiring notes, or founder reflections here."
+              className="min-h-[240px] rounded-lg border border-white/10 bg-night px-4 py-3 text-base leading-7 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan focus:ring-2 focus:ring-cyan/20"
+            />
+          </label>
+          <p className="mt-3 text-sm text-slate-400">Paste at least one messy note, or try the sample diagnosis.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={trySampleDiagnosis}
+              className="rounded-md border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10"
+            >
+              Try sample diagnosis
+            </button>
+            <button
+              type="button"
+              onClick={() => runDiagnosis(rawInput)}
+              disabled={!rawInput.trim()}
+              className="rounded-md bg-cyan px-4 py-2 text-sm font-semibold text-night transition hover:bg-cyan-soft disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+            >
+              Diagnose this mess
+            </button>
+          </div>
         </div>
-      ) : null}
+
+        {diagnosis ? <DiagnosisPreview diagnosis={diagnosis} onGenerateMemo={generateMemo} /> : null}
+        {memo ? (
+          <div className="grid gap-4">
+            <EditableMemo memo={memo} onChange={setMemo} />
+            <SaveActions
+              confirmation={confirmation}
+              onSaveMemo={saveMemo}
+              onSaveAction={saveFounderAction}
+              onSaveDecision={saveDecision}
+            />
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
