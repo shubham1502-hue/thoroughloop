@@ -83,42 +83,42 @@ export function HomeLoop() {
 
   return (
     <section className="border-b border-white/10 bg-night text-white">
-      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 md:px-8 md:py-16">
-        <div className="grid gap-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-cyan">ThoroughLoop</p>
-          <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] tracking-normal md:text-7xl">
+      <div className="mx-auto grid max-w-6xl gap-5 px-4 py-7 sm:px-5 sm:py-10 md:gap-8 md:px-8 md:py-16">
+        <div className="grid gap-3 md:gap-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan sm:text-sm">ThoroughLoop</p>
+          <h1 className="max-w-4xl text-[2.35rem] font-semibold leading-[1.02] tracking-normal sm:text-5xl md:text-7xl">
             Paste messy founder context. Close the loop.
           </h1>
-          <p className="max-w-3xl text-lg leading-8 text-slate-300 md:text-xl">
+          <p className="max-w-3xl text-base leading-7 text-slate-300 md:text-xl md:leading-8">
             ThoroughLoop turns scattered founder notes into one diagnosis, one founder action, and one decision to review next week.
           </p>
-          <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
+          <div className="grid max-w-3xl grid-cols-3 gap-2 sm:gap-3">
             {valueStrip.map((item) => (
-              <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-                <p className="text-sm font-semibold uppercase tracking-[0.12em] text-cyan-soft">{item}</p>
+              <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2.5 sm:px-4 sm:py-3">
+                <p className="text-[0.68rem] font-semibold uppercase leading-4 tracking-[0.1em] text-cyan-soft sm:text-sm sm:tracking-[0.12em]">{item}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-lg border border-white/10 bg-night-card p-5 shadow-dark-soft md:p-6">
+        <div className="rounded-lg border border-white/10 bg-night-card p-4 shadow-dark-soft sm:p-5 md:p-6">
           <label className="grid gap-3">
             <span className="text-sm font-semibold text-slate-100">Messy founder context</span>
             <textarea
               data-testid="messy-context-input"
               value={rawInput}
               onChange={(event) => setRawInput(event.target.value)}
-              rows={9}
+              rows={6}
               placeholder="Paste deal notes, weekly updates, CRM exports, customer blockers, investor notes, hiring notes, or founder reflections here."
-              className="min-h-[240px] rounded-lg border border-white/10 bg-night px-4 py-3 text-base leading-7 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan focus:ring-2 focus:ring-cyan/20"
+              className="min-h-[180px] rounded-lg border border-white/10 bg-night px-3 py-3 text-base leading-7 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan focus:ring-2 focus:ring-cyan/20 sm:min-h-[220px] sm:px-4 md:min-h-[240px]"
             />
           </label>
           <p className="mt-3 text-sm text-slate-400">Paste at least one messy note, or try the sample diagnosis.</p>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:flex sm:flex-wrap sm:gap-3">
             <button
               type="button"
               onClick={trySampleDiagnosis}
-              className="rounded-md border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10"
+              className="rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10 sm:w-auto sm:py-2"
             >
               Try sample diagnosis
             </button>
@@ -126,7 +126,7 @@ export function HomeLoop() {
               type="button"
               onClick={() => runDiagnosis(rawInput)}
               disabled={!rawInput.trim()}
-              className="rounded-md bg-cyan px-4 py-2 text-sm font-semibold text-night transition hover:bg-cyan-soft disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+              className="rounded-md bg-cyan px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-cyan-soft disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400 sm:w-auto sm:py-2"
             >
               Diagnose this mess
             </button>

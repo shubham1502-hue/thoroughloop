@@ -140,7 +140,7 @@ function PreviousDecisionReview() {
   }
 
   return (
-    <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+    <section className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
       <h2 className="text-xl font-semibold">Review previous decision</h2>
       {latestDecision ? (
         <div className="mt-4 grid gap-4">
@@ -190,7 +190,7 @@ function PreviousDecisionReview() {
             </select>
           </label>
           <div>
-            <button type="button" onClick={saveReviewUpdate} className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white">
+            <button type="button" onClick={saveReviewUpdate} className="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white sm:w-auto sm:py-2">
               Save review update
             </button>
             {confirmation ? <p className="mt-3 text-sm font-semibold text-forest">{confirmation}</p> : null}
@@ -298,16 +298,16 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
       : null;
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 px-5 py-10 md:px-8">
+    <div className="mx-auto grid max-w-5xl gap-5 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-10">
       <div className="grid gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Workflow</p>
-        <h1 className="text-4xl font-semibold tracking-normal">{workflow.name}</h1>
-        <p className="max-w-3xl text-lg leading-8 text-muted">{workflow.purpose}</p>
+        <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">{workflow.name}</h1>
+        <p className="max-w-3xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{workflow.purpose}</p>
       </div>
 
       {workflowId === "weekly-review" ? <PreviousDecisionReview /> : null}
 
-      <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+      <section className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
         <div className="grid gap-5">
           {workflowId === "investor-update" ? (
             <label className="grid gap-2">
@@ -370,7 +370,7 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
               type="button"
               onClick={runDiagnosis}
               disabled={!composedInput.trim()}
-              className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-[#9a9a92]"
+              className="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-[#9a9a92] sm:w-auto sm:py-2"
             >
               Diagnose this mess
             </button>

@@ -42,10 +42,10 @@ export function DecisionLog() {
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:px-8">
+    <div className="mx-auto grid max-w-6xl gap-5 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-10">
       <div className="grid gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Decision Log</p>
-        <h1 className="text-4xl font-semibold tracking-normal">Decisions to review next week</h1>
+        <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">Decisions to review next week</h1>
       </div>
 
       {confirmation ? <p className="text-sm font-semibold text-forest">{confirmation}</p> : null}
@@ -53,17 +53,17 @@ export function DecisionLog() {
       {decisions.length ? (
         <div className="grid gap-4">
           {decisions.map((decision) => (
-            <article key={decision.id} className="rounded-lg border border-line bg-white p-5 shadow-soft">
+            <article key={decision.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
               <div className="grid gap-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-muted">{decision.workflow}</p>
-                    <h2 className="mt-1 text-2xl font-semibold">{decision.decisionRecommended}</h2>
+                    <h2 className="mt-1 text-xl font-semibold sm:text-2xl">{decision.decisionRecommended}</h2>
                   </div>
                   <button
                     type="button"
                     onClick={() => void deleteDecision(decision.id)}
-                    className="rounded-md border border-line px-3 py-2 text-sm font-semibold text-[#8f2f2f]"
+                    className="w-full rounded-md border border-line px-3 py-2 text-sm font-semibold text-[#8f2f2f] sm:w-fit"
                   >
                     Delete
                   </button>
@@ -121,7 +121,7 @@ export function DecisionLog() {
                 </div>
 
                 <div>
-                  <button type="button" onClick={() => void saveDecision(decision)} className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white">
+                  <button type="button" onClick={() => void saveDecision(decision)} className="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white sm:w-auto sm:py-2">
                     Save update
                   </button>
                 </div>
