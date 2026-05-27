@@ -43,14 +43,14 @@ export function DiagnosisPreview({
   onGenerateMemo: () => void;
 }) {
   return (
-    <section data-testid="diagnosis-preview" className="rounded-lg border border-white/10 bg-night-card p-5 text-slate-100 shadow-dark-soft">
+    <section data-testid="diagnosis-preview" className="rounded-lg border border-white/10 bg-night-card p-4 text-slate-100 shadow-dark-soft sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-cyan">Diagnosis preview</p>
-          <h2 className="mt-1 text-2xl font-semibold text-white">{diagnosis.workflow.name}</h2>
+          <h2 className="mt-1 text-xl font-semibold text-white sm:text-2xl">{diagnosis.workflow.name}</h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">{diagnosis.recommendedNextStep}</p>
         </div>
-        <div className="rounded-md border border-cyan/30 bg-cyan/10 px-3 py-2 text-sm text-cyan-soft">
+        <div className="w-fit rounded-md border border-cyan/30 bg-cyan/10 px-3 py-2 text-sm text-cyan-soft">
           Confidence: <span className="font-semibold">{diagnosis.confidence}</span>
         </div>
       </div>
@@ -74,17 +74,17 @@ export function DiagnosisPreview({
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-3">
+      <div className="mt-5 grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
         <button
           type="button"
           onClick={onGenerateMemo}
-          className="rounded-md bg-cyan px-4 py-2 text-sm font-semibold text-night transition hover:bg-cyan-soft"
+          className="rounded-md bg-cyan px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-cyan-soft sm:w-auto sm:py-2"
         >
           Generate founder memo
         </button>
         <Link
           href={diagnosis.workflow.path}
-          className="rounded-md border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10"
+          className="rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10 sm:w-auto sm:py-2"
         >
           Open full workflow
         </Link>
@@ -112,13 +112,13 @@ export function EditableMemo({
   }
 
   return (
-    <section data-testid="founder-memo" className="rounded-lg border border-white/10 bg-night-card p-5 text-slate-100 shadow-dark-soft">
+    <section data-testid="founder-memo" className="rounded-lg border border-white/10 bg-night-card p-4 text-slate-100 shadow-dark-soft sm:p-5">
       <div className="flex flex-col gap-2 border-b border-white/10 pb-4">
         <p className="text-sm font-semibold text-cyan">Founder memo</p>
         <input
           value={memo.title}
           onChange={(event) => update("title", event.target.value)}
-          className="rounded-md border border-white/10 bg-night px-3 py-2 text-xl font-semibold text-white outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20"
+          className="rounded-md border border-white/10 bg-night px-3 py-2 text-lg font-semibold text-white outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 sm:text-xl"
         />
       </div>
 
@@ -229,12 +229,12 @@ export function SaveActions({
 }) {
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4 text-slate-100">
-      <div className="flex flex-wrap gap-3">
+      <div className="grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
         <button
           type="button"
           data-testid="save-memo"
           onClick={onSaveMemo}
-          className="rounded-md bg-cyan px-4 py-2 text-sm font-semibold text-night transition hover:bg-cyan-soft"
+          className="rounded-md bg-cyan px-4 py-2.5 text-sm font-semibold text-night transition hover:bg-cyan-soft sm:w-auto sm:py-2"
         >
           Save memo
         </button>
@@ -242,7 +242,7 @@ export function SaveActions({
           type="button"
           data-testid="save-founder-action"
           onClick={onSaveAction}
-          className="rounded-md border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10"
+          className="rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10 sm:w-auto sm:py-2"
         >
           Save founder action
         </button>
@@ -250,7 +250,7 @@ export function SaveActions({
           type="button"
           data-testid="save-decision"
           onClick={onSaveDecision}
-          className="rounded-md border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10"
+          className="rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10 sm:w-auto sm:py-2"
         >
           Save decision
         </button>

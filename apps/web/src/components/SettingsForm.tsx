@@ -35,16 +35,16 @@ export function SettingsForm() {
   }
 
   return (
-    <div className="mx-auto grid max-w-4xl gap-6 px-5 py-10 md:px-8">
+    <div className="mx-auto grid max-w-4xl gap-5 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-10">
       <div className="grid gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Settings</p>
-        <h1 className="text-4xl font-semibold tracking-normal">Founder context defaults</h1>
-        <p className="max-w-2xl text-lg leading-8 text-muted">
+        <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">Founder context defaults</h1>
+        <p className="max-w-2xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
           These settings help memo generation choose the owner and company context without adding setup burden.
         </p>
       </div>
 
-      <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+      <section className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
         <div className="grid gap-4 md:grid-cols-2">
           {fields.map((field) => (
             <label key={field.key} className="grid gap-2">
@@ -58,7 +58,7 @@ export function SettingsForm() {
           ))}
         </div>
         <div className="mt-5">
-          <button type="button" onClick={saveSettings} className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white">
+          <button type="button" onClick={saveSettings} className="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white sm:w-auto sm:py-2">
             Save settings
           </button>
           {confirmation ? <p className="mt-3 text-sm font-semibold text-forest">{confirmation}</p> : null}

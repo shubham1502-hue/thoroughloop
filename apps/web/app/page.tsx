@@ -21,11 +21,11 @@ export default function HomePage() {
     <>
       <HomeLoop />
       <section className="border-t border-white/10 bg-night-soft text-slate-100">
-        <div className="mx-auto grid max-w-6xl gap-6 px-5 py-12 md:px-8">
-          <h2 className="text-2xl font-semibold text-white">Why founders churn from other tools</h2>
-          <div className="grid gap-3 md:grid-cols-5">
+        <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-12">
+          <h2 className="text-xl font-semibold text-white sm:text-2xl">Why founders churn from other tools</h2>
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-5 md:gap-3">
             {churnReasons.map((reason) => (
-              <div key={reason} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+              <div key={reason} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 md:p-4">
                 <p className="font-semibold">{reason}</p>
               </div>
             ))}
@@ -33,11 +33,11 @@ export default function HomePage() {
         </div>
       </section>
       <section className="bg-night text-slate-100">
-        <div className="mx-auto grid max-w-6xl gap-6 px-5 py-12 md:px-8">
-          <h2 className="text-2xl font-semibold text-white">What ThoroughLoop does instead</h2>
-          <div className="grid gap-3 md:grid-cols-5">
+        <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-12">
+          <h2 className="text-xl font-semibold text-white sm:text-2xl">What ThoroughLoop does instead</h2>
+          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-5 md:gap-3">
             {thoroughLoopActions.map((action) => (
-              <div key={action} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+              <div key={action} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 md:p-4">
                 <p className="font-semibold">{action}</p>
               </div>
             ))}

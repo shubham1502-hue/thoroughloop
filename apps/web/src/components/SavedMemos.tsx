@@ -49,13 +49,13 @@ export function SavedMemos() {
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:px-8">
+    <div className="mx-auto grid max-w-6xl gap-5 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-10">
       <div className="grid gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Memos</p>
-        <h1 className="text-4xl font-semibold tracking-normal">Saved founder memos</h1>
+        <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">Saved founder memos</h1>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-line bg-white p-4 md:grid-cols-[1fr_260px]">
+      <div className="grid gap-3 rounded-lg border border-line bg-white p-3 sm:p-4 md:grid-cols-[1fr_260px]">
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
@@ -79,15 +79,15 @@ export function SavedMemos() {
       {filteredMemos.length ? (
         <div className="grid gap-4">
           {filteredMemos.map((memo) => (
-            <article key={memo.id} className="rounded-lg border border-line bg-white p-5 shadow-soft">
+            <article key={memo.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold">{memo.title}</h2>
+                  <h2 className="text-xl font-semibold sm:text-2xl">{memo.title}</h2>
                   <p className="mt-1 text-sm text-muted">
                     {memo.workflow} | {formatDisplayDate(memo.createdAt)}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <button type="button" onClick={() => copyMemo(memo)} className="rounded-md border border-line px-3 py-2 text-sm font-semibold">
                     Copy memo
                   </button>

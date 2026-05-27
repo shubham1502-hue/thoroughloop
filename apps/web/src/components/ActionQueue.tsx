@@ -60,13 +60,13 @@ export function ActionQueue() {
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:px-8">
+    <div className="mx-auto grid max-w-6xl gap-5 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-10">
       <div className="grid gap-3">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-muted">Founder Action Queue</p>
-        <h1 className="text-4xl font-semibold tracking-normal">One action per memo</h1>
+        <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">One action per memo</h1>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-line bg-white p-4 md:grid-cols-3">
+      <div className="grid gap-3 rounded-lg border border-line bg-white p-3 sm:p-4 md:grid-cols-3">
         <select value={workflow} onChange={(event) => setWorkflow(event.target.value as WorkflowName | "All")} className={inputClass}>
           <option value="All">All workflows</option>
           {WORKFLOWS.map((item) => (
@@ -98,18 +98,18 @@ export function ActionQueue() {
       {filteredActions.length ? (
         <div className="grid gap-4">
           {filteredActions.map((action) => (
-            <article key={action.id} className="rounded-lg border border-line bg-white p-5 shadow-soft">
+            <article key={action.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
               <div className="grid gap-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-muted">{action.workflow}</p>
-                    <h2 className="mt-1 text-2xl font-semibold">{action.founderAction}</h2>
+                    <h2 className="mt-1 text-xl font-semibold sm:text-2xl">{action.founderAction}</h2>
                     <p className="mt-2 text-sm leading-6 text-muted">{action.whyItMatters}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => void deleteAction(action.id)}
-                    className="rounded-md border border-line px-3 py-2 text-sm font-semibold text-[#8f2f2f]"
+                    className="w-full rounded-md border border-line px-3 py-2 text-sm font-semibold text-[#8f2f2f] sm:w-fit"
                   >
                     Delete
                   </button>
@@ -182,7 +182,7 @@ export function ActionQueue() {
                 </div>
 
                 <div>
-                  <button type="button" onClick={() => void saveAction(action)} className="rounded-md bg-forest px-4 py-2 text-sm font-semibold text-white">
+                  <button type="button" onClick={() => void saveAction(action)} className="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white sm:w-auto sm:py-2">
                     Save update
                   </button>
                 </div>
