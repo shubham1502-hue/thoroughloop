@@ -1,0 +1,213 @@
+openapi: 3.1.0
+info:
+  title: ThoroughLoop Intake API
+  version: 0.1.0
+  description: Public-safe API intake layer for normalizing external operating signals into the ThoroughLoop founder diagnosis loop.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/intake:
+    post:
+      summary: Normalize an operating signal and generate ThoroughLoop outputs
+      operationId: createIntake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IntakeRequest"
+            examples:
+              crm:
+                summary: CRM revenue signal
+                value:
+                  source: crm
+                  workflow: revenue-rescue
+                  context: Acme is qualified, demo requested for Friday, no owner assigned, and pricing objection is unresolved.
+                  metadata:
+                    company: Acme
+                    priority: high
+                    owner: unassigned
+              slack:
+                summary: Slack operating note
+                value:
+                  source: slack
+                  context: Founder thread says onboarding is blocked, support owner is unclear, and the next customer handoff decision needs attention.
+              google_sheets:
+                summary: Google Sheets weekly row
+                value:
+                  source: google_sheets
+                  workflow: weekly-review
+                  context: Weekly row shows demos up, activation flat, two decisions stuck, and next week priorities unclear.
+                  metadata:
+                    sheet: Weekly operating review
+                    row: 12
+              support_ticket:
+                summary: Support ticket risk
+                value:
+                  source: support_ticket
+                  workflow: onboarding-risk
+                  context: Ticket TL-104 says DemoCo cannot finish setup because activation is blocked by missing admin access.
+              purchase_order:
+                summary: Purchase order handoff
+                value:
+                  source: purchase_order
+                  context: PO-1001 for Example Founder is approved, but fulfillment owner and delivery milestone are not assigned.
+                  metadata:
+                    documentId: PO-1001
+                    priority: medium
+      responses:
+        "200":
+          description: Intake accepted and ThoroughLoop outputs generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntakeSuccessResponse"
+        "400":
+          description: Intake request failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntakeErrorResponse"
+              examples:
+                missingContext:
+                  value:
+                    ok: false
+                    error:
+                      code: MISSING_CONTEXT
+                      message: context is required to generate a founder memo.
+                      retryable: false
+        "500":
+          description: Unexpected intake processing failure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntakeErrorResponse"
+components:
+  schemas:
+    IntegrationSource:
+      type: string
+      enum:
+        - manual
+        - crm
+        - slack
+        - google_sheets
+        - support_ticket
+        - purchase_order
+    WorkflowId:
+      type: string
+      enum:
+        - revenue-rescue
+        - weekly-review
+        - investor-update
+        - onboarding-risk
+        - hiring-bottleneck
+    IntakeRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        source:
+          $ref: "#/components/schemas/IntegrationSource"
+        workflow:
+          $ref: "#/components/schemas/WorkflowId"
+        context:
+          type: string
+          maxLength: 10000
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - context
+    OperatingSignal:
+      type: object
+      additionalProperties: false
+      properties:
+        source:
+          $ref: "#/components/schemas/IntegrationSource"
+        workflow:
+          $ref: "#/components/schemas/WorkflowId"
+        context:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        normalizedAt:
+          type: string
+          format: date-time
+        adapterNotes:
+          type: array
+          items:
+            type: string
+      required:
+        - source
+        - context
+        - metadata
+        - normalizedAt
+        - adapterNotes
+    IntakeSuccessResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: true
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            signal:
+              $ref: "#/components/schemas/OperatingSignal"
+            diagnosis:
+              type: object
+              additionalProperties: true
+            memo:
+              type: object
+              additionalProperties: true
+            founderAction:
+              type: object
+              additionalProperties: true
+            decision:
+              type: object
+              additionalProperties: true
+          required:
+            - signal
+            - diagnosis
+            - memo
+            - founderAction
+            - decision
+      required:
+        - ok
+        - data
+    IntakeErrorCode:
+      type: string
+      enum:
+        - INVALID_JSON
+        - MISSING_CONTEXT
+        - INVALID_CONTEXT
+        - UNSUPPORTED_SOURCE
+        - INVALID_WORKFLOW
+        - PAYLOAD_TOO_LARGE
+        - NORMALIZATION_FAILED
+    IntakeErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: object
+          additionalProperties: false
+          properties:
+            code:
+              $ref: "#/components/schemas/IntakeErrorCode"
+            message:
+              type: string
+            retryable:
+              type: boolean
+          required:
+            - code
+            - message
+            - retryable
+      required:
+        - ok
+        - error

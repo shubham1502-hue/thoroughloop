@@ -1,5 +1,6 @@
 export * from "./date";
 export * from "./diagnosis";
+export * from "./integrations";
 export * from "./memo";
 export * from "./settings";
 export * from "./storage";
