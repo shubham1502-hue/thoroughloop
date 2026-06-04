@@ -56,6 +56,14 @@ This is not a published marketplace integration and does not add live provider s
 
 This layer does not add production sync, provider OAuth, external API calls, request persistence, server-side AI, auth, or a database.
 
+## Demo the integration flow
+
+Use `docs/demo/api-and-webhook-demo.md` to test how manual notes, API payloads, and automation webhook payloads move through the same ThoroughLoop loop:
+
+```text
+External signal → validation → normalization → workflow detection → founder memo → founder action → decision to review
+```
+
 ## What It Does Not Do Yet
 
 - No backend.
