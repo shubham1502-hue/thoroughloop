@@ -82,8 +82,88 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IntakeErrorResponse"
+  /api/webhooks/operating-signal:
+    post:
+      summary: Normalize an automation webhook and generate ThoroughLoop outputs
+      operationId: createOperatingSignalWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookPayload"
+            examples:
+              make:
+                summary: Make CRM signal
+                value:
+                  platform: make
+                  source: crm
+                  workflow: revenue-rescue
+                  text: Acme is qualified, demo requested for Friday, no owner assigned, and pricing objection unresolved.
+                  fields:
+                    company: Acme
+                    priority: high
+                    owner: unassigned
+              zapier:
+                summary: Zapier Slack note
+                value:
+                  platform: zapier
+                  source: slack
+                  message: Founder thread says onboarding is blocked and the support owner is unclear.
+                  fields:
+                    channel: founder-updates
+                    thread: demo-thread-001
+              n8n:
+                summary: n8n Google Sheets row
+                value:
+                  platform: n8n
+                  source: google_sheets
+                  workflow: weekly-review
+                  context: Weekly row shows demos up, activation flat, two decisions stuck, and next week priorities unclear.
+                  fields:
+                    sheet: Weekly operating review
+                    row: 12
+              generic:
+                summary: Generic webhook body
+                value:
+                  platform: generic
+                  body: Example Founder needs one weekly operating decision after scattered notes.
+      responses:
+        "200":
+          description: Webhook accepted and ThoroughLoop outputs generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookSuccessResponse"
+        "400":
+          description: Webhook request failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookErrorResponse"
+              examples:
+                missingWebhookContext:
+                  value:
+                    ok: false
+                    error:
+                      code: MISSING_WEBHOOK_CONTEXT
+                      message: Webhook payload must include context, text, message, note, or body.
+                      retryable: false
+        "500":
+          description: Unexpected webhook processing failure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntakeErrorResponse"
 components:
   schemas:
+    WebhookPlatform:
+      type: string
+      enum:
+        - make
+        - zapier
+        - n8n
+        - generic
     IntegrationSource:
       type: string
       enum:
@@ -117,6 +197,34 @@ components:
           additionalProperties: true
       required:
         - context
+    WebhookPayload:
+      type: object
+      additionalProperties: true
+      properties:
+        platform:
+          $ref: "#/components/schemas/WebhookPlatform"
+        source:
+          $ref: "#/components/schemas/IntegrationSource"
+        workflow:
+          $ref: "#/components/schemas/WorkflowId"
+        context:
+          type: string
+          maxLength: 10000
+        text:
+          type: string
+          maxLength: 10000
+        message:
+          type: string
+          maxLength: 10000
+        note:
+          type: string
+          maxLength: 10000
+        body:
+          type: string
+          maxLength: 10000
+        fields:
+          type: object
+          additionalProperties: true
     OperatingSignal:
       type: object
       additionalProperties: false
@@ -177,6 +285,54 @@ components:
       required:
         - ok
         - data
+    WebhookSuccessResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: true
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            webhook:
+              type: object
+              additionalProperties: false
+              properties:
+                platform:
+                  $ref: "#/components/schemas/WebhookPlatform"
+                notes:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - platform
+                - notes
+            signal:
+              $ref: "#/components/schemas/OperatingSignal"
+            diagnosis:
+              type: object
+              additionalProperties: true
+            memo:
+              type: object
+              additionalProperties: true
+            founderAction:
+              type: object
+              additionalProperties: true
+            decision:
+              type: object
+              additionalProperties: true
+          required:
+            - webhook
+            - signal
+            - diagnosis
+            - memo
+            - founderAction
+            - decision
+      required:
+        - ok
+        - data
     IntakeErrorCode:
       type: string
       enum:
@@ -187,6 +343,15 @@ components:
         - INVALID_WORKFLOW
         - PAYLOAD_TOO_LARGE
         - NORMALIZATION_FAILED
+    WebhookErrorCode:
+      type: string
+      enum:
+        - INVALID_WEBHOOK_JSON
+        - MISSING_WEBHOOK_CONTEXT
+        - INVALID_WEBHOOK_CONTEXT
+        - UNSUPPORTED_WEBHOOK_PLATFORM
+        - INVALID_WEBHOOK_FIELDS
+        - WEBHOOK_PAYLOAD_TOO_LARGE
     IntakeErrorResponse:
       type: object
       additionalProperties: false
@@ -200,6 +365,30 @@ components:
           properties:
             code:
               $ref: "#/components/schemas/IntakeErrorCode"
+            message:
+              type: string
+            retryable:
+              type: boolean
+          required:
+            - code
+            - message
+            - retryable
+      required:
+        - ok
+        - error
+    WebhookErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: object
+          additionalProperties: false
+          properties:
+            code:
+              $ref: "#/components/schemas/WebhookErrorCode"
             message:
               type: string
             retryable:

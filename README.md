@@ -35,6 +35,7 @@ ThoroughLoop keeps the loop smaller:
 - Saves memos, founder actions, decisions, and settings to local storage through storage adapters.
 - Recalls the latest saved decision on the weekly review workflow.
 - Includes a public-safe API intake layer for normalizing external operating signals into the same diagnosis loop.
+- Includes a webhook intake endpoint for Make, Zapier, n8n, and generic automation tools to send public-safe operating signals into the diagnosis loop.
 - Includes an Expo mobile skeleton for later reuse of shared core logic.
 
 ## Integration Layer
@@ -46,6 +47,12 @@ External payload -> validation -> normalization -> workflow detection -> founder
 ```
 
 The intake endpoint accepts synthetic or generic payloads from source labels such as CRM, Slack, Google Sheets, support tickets, purchase order summaries, or manual notes. It validates the payload, normalizes it into an operating signal, then uses the existing core diagnosis and memo generation logic.
+
+### Webhook intake
+
+`POST /api/webhooks/operating-signal` accepts automation-friendly webhook payloads from Make, Zapier, n8n, or generic HTTP workflows and maps them into the same intake layer.
+
+This is not a published marketplace integration and does not add live provider sync, OAuth, auth, database persistence, or server-side AI.
 
 This layer does not add production sync, provider OAuth, external API calls, request persistence, server-side AI, auth, or a database.
 
