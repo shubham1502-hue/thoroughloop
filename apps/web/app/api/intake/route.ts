@@ -1,10 +1,6 @@
 import {
-  createDiagnosis,
   createIntakeError,
-  generateFounderMemo,
-  memoToDecision,
-  memoToFounderAction,
-  normalizeIntakeRequest,
+  runIntakeFlow,
   type IntakeError
 } from "@thoroughloop/core";
 
@@ -34,38 +30,17 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  const normalized = normalizeIntakeRequest(body);
+  const result = runIntakeFlow(body);
 
-  if (!normalized.ok) {
-    return jsonError(normalized.error, 400);
+  if (!result.ok) {
+    return jsonError(result.error, result.error.code === "NORMALIZATION_FAILED" ? 500 : 400);
   }
 
-  try {
-    const diagnosis = createDiagnosis(normalized.data.context, normalized.data.workflow);
-    const memo = generateFounderMemo(diagnosis);
-    const founderAction = memoToFounderAction(memo);
-    const decision = memoToDecision(memo);
-
-    return Response.json(
-      {
-        ok: true,
-        data: {
-          signal: normalized.data,
-          diagnosis,
-          memo,
-          founderAction,
-          decision
-        }
-      },
-      { status: 200 }
-    );
-  } catch {
-    return jsonError(
-      createIntakeError(
-        "NORMALIZATION_FAILED",
-        "The intake payload could not be processed."
-      ),
-      500
-    );
-  }
+  return Response.json(
+    {
+      ok: true,
+      data: result.data
+    },
+    { status: 200 }
+  );
 }
