@@ -34,7 +34,20 @@ ThoroughLoop keeps the loop smaller:
 - Generates editable founder memos without requiring structured forms first.
 - Saves memos, founder actions, decisions, and settings to local storage through storage adapters.
 - Recalls the latest saved decision on the weekly review workflow.
+- Includes a public-safe API intake layer for normalizing external operating signals into the same diagnosis loop.
 - Includes an Expo mobile skeleton for later reuse of shared core logic.
+
+## Integration Layer
+
+ThoroughLoop includes a public-safe API intake layer for external operating signals.
+
+```text
+External payload -> validation -> normalization -> workflow detection -> founder memo -> founder action -> decision to review
+```
+
+The intake endpoint accepts synthetic or generic payloads from source labels such as CRM, Slack, Google Sheets, support tickets, purchase order summaries, or manual notes. It validates the payload, normalizes it into an operating signal, then uses the existing core diagnosis and memo generation logic.
+
+This layer does not add production sync, provider OAuth, external API calls, request persistence, server-side AI, auth, or a database.
 
 ## What It Does Not Do Yet
 
@@ -42,7 +55,8 @@ ThoroughLoop keeps the loop smaller:
 - No auth.
 - No database.
 - No payments.
-- No external integrations.
+- No real external provider OAuth.
+- No live CRM, Slack, form, ERP, document, or ticketing integration.
 - No server-side AI calls.
 - No team workspace.
 - No production sync across devices.
