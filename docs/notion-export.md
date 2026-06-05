@@ -82,8 +82,7 @@ The raw Notion error message is never forwarded to the client; only a safe summa
 ## Running tests
 
 ```bash
-cd apps/web
-pnpm test
+npm --workspace @thoroughloop/web run test
 ```
 
 Tests cover: `validateNotionExportPayload` (rejects missing/invalid input, accepts valid memo), `buildNotionPage` field mapping (all properties including date and select types).
