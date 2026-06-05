@@ -58,6 +58,7 @@ For a slightly longer manual path, see [docs/demo-walkthrough.md](docs/demo-walk
 - Workflow-specific loops on `/workflows`.
 - Local founder context defaults on `/settings`.
 - Public-safe intake and webhook examples in [docs/demo/api-and-webhook-demo.md](docs/demo/api-and-webhook-demo.md).
+- A lightweight Notion API export workflow that converts generated founder memos, actions, and review decisions into structured database records with validation, tests, and setup notes in [docs/notion-export.md](docs/notion-export.md).
 
 ## Local-First Boundary
 
