@@ -2,81 +2,96 @@
 
 [![CI](https://github.com/shubham1502-hue/thoroughloop/actions/workflows/ci.yml/badge.svg)](https://github.com/shubham1502-hue/thoroughloop/actions/workflows/ci.yml)
 
-ThoroughLoop is a web-first founder operating diagnosis tool that turns messy founder context into one memo, one founder action, and one decision to review next week.
+ThoroughLoop is a local-first founder operating diagnosis tool that turns messy founder context into one diagnosis, one founder action, and one decision to review next week.
 
-## Live demo
+Paste messy founder context. Close the loop.
 
-The web MVP is deployed on Vercel:
+## Live Demo
 
 https://thoroughloop.vercel.app
 
-The current version is local-first. Saved memos, actions, decisions, and settings are stored in the browser through the preserved Founder OS Lite storage keys.
-
 ## Why This Exists
 
-Early-stage founders often churn from project management systems, dashboards, CRMs, spreadsheets, and heavy workspaces because those tools require setup, data hygiene, and ongoing maintenance before they provide judgment.
+Early-stage founder context is scattered across standup notes, customer calls, Slack threads, CRM updates, investor drafts, and follow-ups. The problem is not another dashboard. The problem is converting messy context into a clear operating loop.
 
-ThoroughLoop keeps the loop smaller:
+ThoroughLoop keeps the loop narrow: paste the mess, identify the bottleneck, choose one founder action, and save one decision to review later.
+
+## Core Loop
 
 1. Paste messy founder context.
-2. Detect the workflow.
-3. Extract operating signals.
-4. Generate a founder memo.
-5. Save one founder action.
-6. Save one decision.
-7. Review the decision next week.
+2. Get one diagnosis.
+3. Pick one founder action.
+4. Save one decision to review next week.
+5. Return later through saved loops.
 
-## What It Does Today
+## Screenshots
 
-- Runs a production-minded web MVP in `apps/web`.
-- Detects five workflows: Revenue Rescue, Weekly Operating Review, Investor Update, Onboarding Risk, and Hiring Bottleneck.
-- Uses deterministic client-side logic in `packages/core`.
-- Generates editable founder memos without requiring structured forms first.
-- Saves memos, founder actions, decisions, and settings to local storage through storage adapters.
-- Recalls the latest saved decision on the weekly review workflow.
-- Includes a public-safe API intake layer for normalizing external operating signals into the same diagnosis loop.
-- Includes a webhook intake endpoint for Make, Zapier, n8n, and generic automation tools to send public-safe operating signals into the diagnosis loop.
-- Includes an Expo mobile skeleton for later reuse of shared core logic.
+Captured from the current app with sample founder context.
 
-## Integration Layer
+![ThoroughLoop landing page](docs/assets/thoroughloop-landing.png)
 
-ThoroughLoop includes a public-safe API intake layer for external operating signals.
+![ThoroughLoop compose view with sample context loaded](docs/assets/thoroughloop-compose.png)
 
-```text
-External payload -> validation -> normalization -> workflow detection -> founder memo -> founder action -> decision to review
-```
+![ThoroughLoop result memo with diagnosis, founder action, and decision](docs/assets/thoroughloop-result.png)
 
-The intake endpoint accepts synthetic or generic payloads from source labels such as CRM, Slack, Google Sheets, support tickets, purchase order summaries, or manual notes. It validates the payload, normalizes it into an operating signal, then uses the existing core diagnosis and memo generation logic.
+![ThoroughLoop saved loops and footer demo surfaces](docs/assets/thoroughloop-saved-loops.png)
 
-### Webhook intake
+## Demo Walkthrough
 
-`POST /api/webhooks/operating-signal` accepts automation-friendly webhook payloads from Make, Zapier, n8n, or generic HTTP workflows and maps them into the same intake layer.
+1. Open the [live demo](https://thoroughloop.vercel.app).
+2. Click `Paste your context`.
+3. Try a sample or paste short messy founder notes.
+4. Click `Close the loop`.
+5. Review the diagnosis, TL;DR, evidence, missing context, founder action, decision, review date, and investor-safe summary.
+6. Click `Save loop`.
+7. Return to the landing page and confirm the saved loop appears.
+8. Use the footer `Demo surfaces` links to inspect `Memos`, `Actions`, `Decisions`, `Workflows`, and `Settings`.
 
-This is not a published marketplace integration and does not add live provider sync, OAuth, auth, database persistence, or server-side AI.
+For a slightly longer manual path, see [docs/demo-walkthrough.md](docs/demo-walkthrough.md).
 
-This layer does not add production sync, provider OAuth, external API calls, request persistence, server-side AI, auth, or a database.
+## What Reviewers Can Inspect
 
-## Demo the integration flow
+- The main loop on `/`.
+- Saved memos on `/memos`.
+- Founder actions on `/action-queue`.
+- Decisions to review on `/decision-log`.
+- Workflow-specific loops on `/workflows`.
+- Local founder context defaults on `/settings`.
+- Public-safe intake and webhook examples in [docs/demo/api-and-webhook-demo.md](docs/demo/api-and-webhook-demo.md).
 
-Use `docs/demo/api-and-webhook-demo.md` to test how manual notes, API payloads, and automation webhook payloads move through the same ThoroughLoop loop:
+## Local-First Boundary
 
-```text
-External signal → validation → normalization → workflow detection → founder memo → founder action → decision to review
-```
+ThoroughLoop stores saved loops, memos, actions, decisions, and settings in this browser through `localStorage`. There is no account, cross-device sync, or server-side persistence in the web MVP.
 
-## What It Does Not Do Yet
+Clearing browser storage may remove saved local data. The API and webhook docs use synthetic or generic payloads and do not add provider OAuth, live external sync, request persistence, auth, database storage, or server-side AI.
+
+## Intentionally Out Of Scope
+
+This is product discipline, not missing setup:
 
 - No backend.
 - No auth.
 - No database.
 - No payments.
-- No real external provider OAuth.
-- No live CRM, Slack, form, ERP, document, or ticketing integration.
-- No server-side AI calls.
 - No team workspace.
+- No CRM UI.
+- No analytics.
+- No AI provider integration.
+- No external data sync.
 - No production sync across devices.
 
-Current data is local to the browser or device. Clearing browser storage may remove saved memos, founder actions, decisions, and settings.
+## Tech Stack
+
+- Next.js 16 web app in `apps/web`.
+- React 18 and TypeScript.
+- Tailwind CSS styling.
+- Deterministic product logic in `packages/core`.
+- Shared design tokens in `packages/ui`.
+- Browser `localStorage` persistence through storage adapters.
+- Playwright e2e coverage for the browser loop.
+- Node test runner through `tsx --test` for core logic.
+- Expo mobile skeleton in `apps/mobile` for later reuse of shared core logic.
+- Vercel deployment for the public web demo.
 
 ## Repo Structure
 
@@ -87,10 +102,10 @@ apps/
 packages/
   core/      Product logic, types, storage helpers, workflow detection, memo generation
   ui/        Shared design tokens
-docs/        Product, mobile, and handoff documentation
+docs/        Product, API, webhook, deployment, and handoff documentation
 ```
 
-## Local Development
+## Run Locally
 
 Use Node 20.19 or newer.
 
@@ -101,21 +116,9 @@ npm run dev:web
 
 Then open `http://localhost:3000`.
 
-## Scripts
-
-```bash
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-npm run test:e2e
-```
-
-`npm run test` runs the core test suite. `npm run test:e2e` runs the Playwright smoke test for the main browser loop.
-
 ## Validation
 
-Before pushing changes, run:
+Use the repo scripts before opening a PR:
 
 ```bash
 npm run lint
@@ -123,24 +126,19 @@ npm run typecheck
 npm run test
 npm run build
 git diff --check
-```
-
-For browser-loop validation, also run:
-
-```bash
 npm run test:e2e
 ```
 
-Manual browser validation is documented in `docs/manual-smoke-test.md`.
+`npm run test` runs the core test suite. `npm run test:e2e` runs the Playwright smoke test for the main browser loop.
+
+Manual browser validation is documented in [docs/manual-smoke-test.md](docs/manual-smoke-test.md).
 
 ## Public-Safe Boundary
 
-This repository uses synthetic examples and local-first persistence. It does not claim production usage, customers, revenue impact, deployment, compliance readiness, or external data integrations.
+This repository uses synthetic examples and local-first persistence. It does not claim production usage, customers, revenue impact, compliance readiness, or live external data integrations.
 
-## Roadmap
-
-Near-term work should harden the web MVP, improve synthetic examples, refine export or share paths for memos, and improve review cadence. Later work can evaluate auth, database persistence, team workspace support, integrations, server-side AI, and a full mobile app after product validation.
+For the local data boundary, see [docs/privacy-local-data.md](docs/privacy-local-data.md).
 
 ## GitHub Project Description
 
-A web-first founder operating diagnosis tool that turns messy founder context into one memo, one action, and one decision to review next week.
+A local-first founder operating diagnosis tool that turns messy founder context into one diagnosis, one action, and one decision to review next week.
