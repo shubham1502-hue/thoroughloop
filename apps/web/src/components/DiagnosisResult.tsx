@@ -216,17 +216,34 @@ export function EditableMemo({
   );
 }
 
+export type NotionExportState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "success"; url: string }
+  | { kind: "error"; message: string };
+
 export function SaveActions({
   confirmation,
   onSaveMemo,
   onSaveAction,
-  onSaveDecision
+  onSaveDecision,
+  onExportToNotion,
+  notionExportState
 }: {
   confirmation: string;
   onSaveMemo: () => void;
   onSaveAction: () => void;
   onSaveDecision: () => void;
+  onExportToNotion?: () => void;
+  notionExportState?: NotionExportState;
 }) {
+  const exportLabel =
+    notionExportState?.kind === "loading"
+      ? "Exporting…"
+      : notionExportState?.kind === "success"
+        ? "Exported ✓"
+        : "Export to Notion";
+
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4 text-slate-100">
       <div className="grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
@@ -254,8 +271,38 @@ export function SaveActions({
         >
           Save decision
         </button>
+        {onExportToNotion ? (
+          <button
+            type="button"
+            data-testid="export-to-notion"
+            onClick={onExportToNotion}
+            disabled={
+              notionExportState?.kind === "loading" ||
+              notionExportState?.kind === "success"
+            }
+            className="rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-cyan/50 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-2"
+          >
+            {exportLabel}
+          </button>
+        ) : null}
       </div>
       {confirmation ? <p className="mt-3 text-sm font-semibold text-cyan-soft">{confirmation}</p> : null}
+      {notionExportState?.kind === "success" ? (
+        <p className="mt-3 text-sm font-semibold text-cyan-soft">
+          Exported to Notion.{" "}
+          <a
+            href={notionExportState.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4"
+          >
+            Open page
+          </a>
+        </p>
+      ) : null}
+      {notionExportState?.kind === "error" ? (
+        <p className="mt-3 text-sm font-semibold text-red-400">{notionExportState.message}</p>
+      ) : null}
     </div>
   );
 }

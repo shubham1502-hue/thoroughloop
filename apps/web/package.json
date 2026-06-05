@@ -8,7 +8,8 @@
     "lint": "eslint app src --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "NEXT_IGNORE_INCORRECT_LOCKFILE=1 next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsx --tsconfig tsconfig.test.json --test test/*.test.ts"
   },
   "dependencies": {
     "@thoroughloop/core": "*",
