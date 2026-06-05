@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@thoroughloop/core": ["../../packages/core/src/index.ts"],
+      "@thoroughloop/core/*": ["../../packages/core/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

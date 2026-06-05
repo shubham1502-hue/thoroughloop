@@ -18,6 +18,7 @@ import {
   type Settings
 } from "@thoroughloop/core";
 import { webLocalStorageAdapter } from "@/storage/webLocalStorageAdapter";
+import { useNotionExport } from "@/hooks/useNotionExport";
 
 type LoopStage = "landing" | "compose" | "thinking" | "result";
 
@@ -691,24 +692,34 @@ function ActionDecisionPair({
   );
 }
 
+type NotionExportState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "success"; url: string }
+  | { kind: "error"; message: string };
+
 function Result({
   diagnosis,
   memo,
   selectedSampleId,
   copied,
   saved,
+  notionState,
   onStartNew,
   onCopyMemo,
-  onSaveLoop
+  onSaveLoop,
+  onExportToNotion
 }: {
   diagnosis: FounderDiagnosis;
   memo: SavedMemo;
   selectedSampleId: string | null;
   copied: boolean;
   saved: boolean;
+  notionState: NotionExportState;
   onStartNew: () => void;
   onCopyMemo: () => void;
   onSaveLoop: () => void;
+  onExportToNotion: () => void;
 }) {
   const copy = useMemo(() => resultCopyForWorkflow(diagnosis, selectedSampleId), [diagnosis, selectedSampleId]);
   const reviewDate = memoToDecision(memo).reviewDate;
@@ -770,7 +781,7 @@ function Result({
       </Section>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#071016]/95 px-4 py-3 backdrop-blur lg:sticky lg:bottom-4 lg:rounded-lg lg:border lg:bg-[#101820]/95">
-        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <ButtonBase
             onClick={onStartNew}
             className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
@@ -790,7 +801,30 @@ function Result({
           >
             {saved ? "Loop saved" : "Save loop"}
           </ButtonBase>
+          <ButtonBase
+            data-testid="export-to-notion"
+            onClick={onExportToNotion}
+            disabled={notionState.kind === "loading" || notionState.kind === "success"}
+            className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
+          >
+            {notionState.kind === "loading"
+              ? "Exporting…"
+              : notionState.kind === "success"
+                ? "Exported ✓"
+                : "Export to Notion"}
+          </ButtonBase>
         </div>
+        {notionState.kind === "success" ? (
+          <p className="mx-auto mt-2 max-w-4xl text-xs text-[#f0c76c]">
+            Exported to Notion.{" "}
+            <a href={notionState.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+              Open page
+            </a>
+          </p>
+        ) : null}
+        {notionState.kind === "error" ? (
+          <p className="mx-auto mt-2 max-w-4xl text-xs text-red-400">{notionState.message}</p>
+        ) : null}
       </div>
     </section>
   );
@@ -811,6 +845,7 @@ export function HomeLoop() {
   const sampleSectionRef = useRef<HTMLElement>(null);
   const historySectionRef = useRef<HTMLElement>(null);
   const selectedSample = selectedSampleId ? sampleById.get(selectedSampleId) ?? null : null;
+  const { status: notionStatus, exportToNotion, reset: resetNotion } = useNotionExport();
 
   useEffect(() => {
     void readJson<Settings>(webLocalStorageAdapter, STORAGE_KEYS.settings, DEFAULT_SETTINGS).then(setSettings);
@@ -901,6 +936,14 @@ export function HomeLoop() {
     setSavedCurrentLoop(true);
   }
 
+  async function exportCurrentMemoToNotion() {
+    if (!memo) {
+      return;
+    }
+
+    await exportToNotion(memo);
+  }
+
   function startNewLoop() {
     setRawInput("");
     setSelectedSampleId(null);
@@ -908,6 +951,7 @@ export function HomeLoop() {
     setMemo(null);
     setCopiedMemo(false);
     setSavedCurrentLoop(false);
+    resetNotion();
     setStage("landing");
     window.requestAnimationFrame(() => {
       historySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -939,9 +983,11 @@ export function HomeLoop() {
         selectedSampleId={selectedSampleId}
         copied={copiedMemo}
         saved={savedCurrentLoop}
+        notionState={notionStatus}
         onStartNew={startNewLoop}
         onCopyMemo={copyCurrentMemo}
         onSaveLoop={saveLoop}
+        onExportToNotion={exportCurrentMemoToNotion}
       />
     );
   }
