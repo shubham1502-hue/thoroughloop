@@ -1,79 +1,73 @@
 # Demo Walkthrough
 
-This walkthrough shows the main ThoroughLoop MVP loop with synthetic data.
+This walkthrough shows the current ThoroughLoop browser loop with sample founder context.
 
-## What To Open
+## Open The App
 
-Start the web app:
+Live demo:
+
+```text
+https://thoroughloop.vercel.app
+```
+
+Local dev:
 
 ```bash
 npm run dev:web
 ```
 
-Open `http://localhost:3000`.
+Then open `http://localhost:3000`.
 
-## Sample Messy Founder Context
+## Walk The Main Loop
+
+1. Open the landing page.
+2. Click `Paste your context`.
+3. Choose a sample card or paste short messy founder notes.
+4. Confirm the compose view focuses the text area and shows the soft hint.
+5. Click `Close the loop`.
+6. Confirm the thinking state says `Finding the actual bottleneck`.
+7. Review the result:
+   - Diagnosis
+   - TL;DR
+   - Why this is the bottleneck
+   - Evidence from your context
+   - Missing context
+   - Founder action this week
+   - Decision to review next week
+   - Investor-safe summary
+8. Click `Copy memo` if you want the memo text.
+9. Click `Save loop`.
+10. Click `Start new loop`.
+11. Confirm the saved loop appears in the `Saved loops` section.
+12. Refresh the page and confirm the saved loop persists.
+
+## Demo Surfaces
+
+Use the footer `Demo surfaces` links to inspect the existing route pages:
+
+- `Memos` -> `/memos`
+- `Actions` -> `/action-queue`
+- `Decisions` -> `/decision-log`
+- `Workflows` -> `/workflows`
+- `Settings` -> `/settings`
+
+These pages read from the same local browser storage used by the main loop.
+
+## Sample Context
 
 ```text
-FinCore Labs has been stuck in negotiation for 21 days after raising a pricing concern. BrightLayer AI has not replied after proposal for 12 days. Northstar Ops completed demo but is waiting for internal review. Founder follow-up is slipping and proposal-stage deals need attention this week.
+FinCore Labs is stuck after pricing. BrightLayer AI ghosted after proposal. Northstar Ops needs internal review. I keep adding leads, but the late-stage pipeline is not closing.
 ```
 
-## Expected Diagnosis Result
+## Expected Result Shape
 
-- Detected workflow: Revenue Rescue
-- Confidence: High or close, depending on current keyword scoring
-- Expected companies or deal names: FinCore Labs, BrightLayer AI, Northstar Ops
-- Expected risk signals: stuck deal or blocked workflow, pricing concern, follow-up decay, proposal-stage risk, late-stage revenue risk
-- Recommended next step: generate a Revenue Rescue memo and prioritize the highest-risk follow-up
+The exact wording may vary with the deterministic workflow logic, but the result should stay focused on:
 
-## Expected Memo
-
-The generated memo should include:
-
-- Problem
-- Evidence
-- Diagnosis
-- Recommended decision
-- Founder action
-- Owner
-- Due date
-- Metric to watch
-- What to ignore this week
-- Assumptions made
-- Investor-safe summary
-
-The memo should be editable before saving.
-
-## Expected Founder Action
-
-The saved founder action should focus on one founder-led follow-up to the highest-risk late-stage account and confirming the next decision step.
-
-Find it at `/action-queue`.
-
-## Expected Decision
-
-The saved decision should decide whether founder-led follow-up should focus on the highest-risk late-stage account before adding new top-of-funnel work.
-
-Find it at `/decision-log`.
-
-## Saved Memo Location
-
-After clicking `Save memo`, open `/memos`. The saved memo should appear with:
-
-- Title
-- Workflow
-- Created date
-- Problem
-- Recommended decision
-- Founder action
-- Investor-safe summary
-
-## Weekly Review Recall
-
-After clicking `Save decision`, open `/workflows/weekly-review`.
-
-The `Review previous decision` section should show the latest saved decision, assigned action, owner, metric to watch, review date, outcome note input, and status selector.
+- One bottleneck diagnosis.
+- One founder action for this week.
+- One decision question to review next week.
+- A short investor-safe summary.
 
 ## Local Data Note
 
-The MVP uses local browser storage. If the saved items do not appear, confirm browser storage has not been cleared or blocked.
+Saved loops, memos, actions, decisions, and settings use browser `localStorage`. Clearing browser storage may remove saved local data.
