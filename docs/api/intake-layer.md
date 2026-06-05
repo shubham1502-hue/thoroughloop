@@ -148,4 +148,4 @@ curl -X POST http://localhost:3000/api/intake \
 
 ## Public-Safe Boundary
 
-Use synthetic data only. Do not send real customer data, credentials, private purchase orders, private documents, internal workflow names, or confidential operating notes into public demos.
+Use synthetic data only. Do not send customer data, credentials, private purchase orders, private documents, internal workflow names, or confidential operating notes into public demos.

@@ -1,4 +1,4 @@
-# Export to Notion — Technical Reference
+# Export to Notion: Technical Reference
 
 ## Overview
 
