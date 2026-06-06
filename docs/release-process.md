@@ -58,7 +58,7 @@ Do not claim:
 - Customers
 - Revenue impact
 - Compliance readiness
-- External integrations
+- Production external provider sync
 - AI backend behavior
 - Cross-device sync
 
@@ -69,12 +69,14 @@ unless the repository and deployment evidence support the claim.
 Keep release notes honest about the current product boundary:
 
 - Local-first storage
-- No backend
-- No auth
-- No database
+- Server-side routes may exist for intake, webhook normalization, and optional Notion export
+- No user accounts
+- No production database
+- No server-side saved-loop persistence
 - No payments
-- No external integrations
-- No server-side AI
+- No team workspace
+- No production external provider sync
+- No server-side AI generation
 
 ## Release Mechanics
 

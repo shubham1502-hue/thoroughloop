@@ -65,9 +65,11 @@ The visible product name is ThoroughLoop, but the local storage keys intentional
 
 This protects compatibility with saved local data from the previous working name.
 
-## Why No Backend Yet
+## Why No Production Persistence Yet
 
-V1 is intentionally local-first. There is no backend, auth, database, payments, external integration layer, or server-side AI call. This keeps the MVP focused on the founder operating diagnosis loop before adding account or sync complexity.
+V1 is intentionally local-first. There are server-side Next.js routes for API intake, webhook normalization, and optional Notion export exploration, but there is no account system, production database, payment flow, team workspace, server-side saved-loop persistence, or server-side AI call.
+
+This keeps the MVP focused on the founder operating diagnosis loop before adding account, sync, or workspace complexity.
 
 ## Future Extension Points
 
