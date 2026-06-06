@@ -12,7 +12,7 @@ ThoroughLoop needs to prove the core founder operating diagnosis loop before add
 
 Build the first production-minded MVP in `apps/web` using Next.js and React. Keep the web app focused on paste context, diagnose, generate a memo, save one founder action, save one decision, and review the decision next week.
 
-Do not add backend, auth, database, payments, external integrations, or server-side AI in V1.
+Do not add account auth, production database persistence, payments, team workspace, live provider sync, or server-side AI in V1. Server-side route scaffolding can exist only when it keeps the web MVP focused on public-safe intake, export, or validation paths.
 
 ## Consequences
 

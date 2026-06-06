@@ -17,20 +17,22 @@ These are stored in the browser or device through storage adapters.
 
 The current MVP does not include:
 
-- Backend services
-- Auth
-- Database persistence
+- User accounts
+- Production database persistence
 - Payments
-- External integrations
+- Team workspaces
+- Production external provider sync
 - Server-side AI calls
 
-Pasted founder context is not sent to a ThoroughLoop backend because no backend exists in V1.
+Pasted founder context in the main browser loop is processed locally in the app and saved only when the user saves a loop. API intake, webhook, and optional Notion export routes can process submitted payloads through server-side Next.js routes, but those routes are not the app's saved-loop persistence layer.
 
 ## Local Storage Boundary
 
 Saved data is device-specific. Clearing browser storage may remove saved memos, founder actions, decisions, and settings.
 
 If the app is opened in a different browser, profile, device, or private browsing session, saved data may not be available.
+
+Optional Notion export requires explicit environment configuration and user action. It is separate from the local saved-loop storage boundary.
 
 ## Public Demo Guidance
 
