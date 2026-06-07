@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   STORAGE_KEYS,
   WORKFLOWS,
+  contextSourceLabelForId,
   readCollection,
   removeCollectionItem,
   replaceCollectionItem,
@@ -102,7 +103,9 @@ export function ActionQueue() {
               <div className="grid gap-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-muted">{action.workflow}</p>
+                    <p className="text-sm font-semibold text-muted">
+                      {action.workflow} | Source: {contextSourceLabelForId(action.contextSource)}
+                    </p>
                     <h2 className="mt-1 text-xl font-semibold sm:text-2xl">{action.founderAction}</h2>
                     <p className="mt-2 text-sm leading-6 text-muted">{action.whyItMatters}</p>
                   </div>

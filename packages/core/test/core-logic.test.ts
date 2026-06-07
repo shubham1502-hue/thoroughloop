@@ -3,12 +3,16 @@ import { describe, it } from "node:test";
 
 import {
   createDiagnosis,
+  CONTEXT_SOURCE_OPTIONS,
+  DEFAULT_CONTEXT_SOURCE_ID,
+  contextSourceLabelForId,
   extractCompanyOrDealNames,
   extractRiskSignals,
   formatMemoForCopy,
   generateFounderMemo,
   memoToDecision,
   memoToFounderAction,
+  normalizeContextSourceId,
   STORAGE_KEYS
 } from "../src/index";
 
@@ -85,6 +89,64 @@ describe("workflow detection", () => {
     assert.equal(diagnosis.workflow.name, "Weekly Operating Review");
     assert.equal(diagnosis.confidence, "Low");
     assert.deepEqual(diagnosis.extractedRiskSignals, ["Context is too thin to extract strong risk signals"]);
+  });
+});
+
+describe("context source metadata", () => {
+  it("defaults diagnosis source to general founder notes", () => {
+    const diagnosis = createDiagnosis("Weekly notes show one messy founder follow-up.");
+
+    assert.equal(diagnosis.contextSource, DEFAULT_CONTEXT_SOURCE_ID);
+    assert.equal(contextSourceLabelForId(diagnosis.contextSource), "General founder notes");
+  });
+
+  it("keeps the source option list founder-facing and complete", () => {
+    const labels = CONTEXT_SOURCE_OPTIONS.map((option) => option.label);
+
+    assert.deepEqual(labels, [
+      "General founder notes",
+      "Slack thread or channel notes",
+      "Notion page or workspace notes",
+      "CRM or sales pipeline notes",
+      "Customer feedback",
+      "Meeting notes",
+      "Product requirements or handoff notes",
+      "Hiring follow-up notes",
+      "Other"
+    ]);
+  });
+
+  it("falls back safely for unknown source ids", () => {
+    assert.equal(normalizeContextSourceId("unknown"), DEFAULT_CONTEXT_SOURCE_ID);
+    assert.equal(contextSourceLabelForId(undefined), "General founder notes");
+  });
+
+  it("persists selected source metadata through memo, action, decision, and copy text", () => {
+    const diagnosis = createDiagnosis(
+      "Slack thread says onboarding is blocked, customer owner is unclear, and founder follow-up is needed.",
+      undefined,
+      "slack"
+    );
+    const memo = generateFounderMemo(diagnosis);
+    const action = memoToFounderAction(memo);
+    const decision = memoToDecision(memo);
+    const copy = formatMemoForCopy(memo);
+
+    assert.equal(diagnosis.contextSource, "slack");
+    assert.equal(memo.contextSource, "slack");
+    assert.equal(action.contextSource, "slack");
+    assert.equal(decision.contextSource, "slack");
+    assert.match(memo.evidence, /Source: Slack thread or channel notes/);
+    assert.match(copy, /Source\nSlack thread or channel notes/);
+  });
+
+  it("renders old saved memos without source metadata safely", () => {
+    const memo = generateFounderMemo(createDiagnosis("A proposal is stuck after pricing."));
+    const legacyMemo = { ...memo };
+    delete legacyMemo.contextSource;
+
+    assert.equal(contextSourceLabelForId(legacyMemo.contextSource), "General founder notes");
+    assert.match(formatMemoForCopy(legacyMemo), /Source\nGeneral founder notes/);
   });
 });
 

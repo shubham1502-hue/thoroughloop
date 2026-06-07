@@ -1,3 +1,4 @@
+import type { ContextSourceId } from "../contextSources";
 import { createDiagnosis } from "../diagnosis";
 import { generateFounderMemo, memoToDecision, memoToFounderAction } from "../memo";
 import type {
@@ -8,7 +9,7 @@ import type {
 } from "../types";
 import { createIntakeError } from "./errors";
 import { normalizeIntakeRequest } from "./normalizeSignal";
-import type { IntakeError, OperatingSignal } from "./types";
+import type { IntakeError, IntegrationSource, OperatingSignal } from "./types";
 
 export interface IntakeFlowData {
   signal: OperatingSignal;
@@ -28,6 +29,19 @@ export type IntakeFlowResult =
       error: IntakeError;
     };
 
+function contextSourceFromIntegrationSource(source: IntegrationSource): ContextSourceId {
+  const labels: Record<IntegrationSource, ContextSourceId> = {
+    manual: "general_notes",
+    crm: "crm_pipeline",
+    slack: "slack",
+    google_sheets: "general_notes",
+    support_ticket: "customer_feedback",
+    purchase_order: "requirements_handoff"
+  };
+
+  return labels[source];
+}
+
 export function runIntakeFlow(input: unknown): IntakeFlowResult {
   const normalized = normalizeIntakeRequest(input);
 
@@ -36,7 +50,11 @@ export function runIntakeFlow(input: unknown): IntakeFlowResult {
   }
 
   try {
-    const diagnosis = createDiagnosis(normalized.data.context, normalized.data.workflow);
+    const diagnosis = createDiagnosis(
+      normalized.data.context,
+      normalized.data.workflow,
+      contextSourceFromIntegrationSource(normalized.data.source)
+    );
     const memo = generateFounderMemo(diagnosis);
     const founderAction = memoToFounderAction(memo);
     const decision = memoToDecision(memo);

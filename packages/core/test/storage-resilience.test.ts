@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   appendCollectionItem,
+  contextSourceLabelForId,
   generateFounderMemo,
   memoToDecision,
   memoToFounderAction,
@@ -65,6 +66,30 @@ describe("local storage resilience", () => {
     assert.deepEqual(await readCollection<SavedMemo>(adapter, STORAGE_KEYS.memos), [memo]);
     assert.deepEqual(await readCollection<SavedFounderAction>(adapter, STORAGE_KEYS.actions), [action]);
     assert.deepEqual(await readCollection<SavedDecision>(adapter, STORAGE_KEYS.decisions), [decision]);
+  });
+
+  it("reads legacy saved loops without source metadata", async () => {
+    const adapter = new MemoryStorageAdapter();
+    const { memo, action, decision } = createSavedObjects();
+    const legacyMemo = { ...memo };
+    const legacyAction = { ...action };
+    const legacyDecision = { ...decision };
+
+    delete legacyMemo.contextSource;
+    delete legacyAction.contextSource;
+    delete legacyDecision.contextSource;
+
+    await writeJson(adapter, STORAGE_KEYS.memos, [legacyMemo]);
+    await writeJson(adapter, STORAGE_KEYS.actions, [legacyAction]);
+    await writeJson(adapter, STORAGE_KEYS.decisions, [legacyDecision]);
+
+    const [storedMemo] = await readCollection<SavedMemo>(adapter, STORAGE_KEYS.memos);
+    const [storedAction] = await readCollection<SavedFounderAction>(adapter, STORAGE_KEYS.actions);
+    const [storedDecision] = await readCollection<SavedDecision>(adapter, STORAGE_KEYS.decisions);
+
+    assert.equal(contextSourceLabelForId(storedMemo.contextSource), "General founder notes");
+    assert.equal(contextSourceLabelForId(storedAction.contextSource), "General founder notes");
+    assert.equal(contextSourceLabelForId(storedDecision.contextSource), "General founder notes");
   });
 
   it("reads valid existing settings data", async () => {

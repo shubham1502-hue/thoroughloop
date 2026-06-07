@@ -10,6 +10,7 @@ The current MVP can store:
 - Saved founder actions
 - Saved decisions
 - Settings
+- Manual source labels attached to saved loops
 
 These are stored in the browser or device through storage adapters.
 
@@ -25,6 +26,8 @@ The current MVP does not include:
 - Server-side AI calls
 
 Pasted founder context in the main browser loop is processed locally in the app and saved only when the user saves a loop. API intake, webhook, and optional Notion export routes can process submitted payloads through server-side Next.js routes, but those routes are not the app's saved-loop persistence layer.
+
+Source-aware import is manual labeling only. A user can choose a label such as Slack thread or channel notes, Notion page or workspace notes, CRM or sales pipeline notes, customer feedback, meeting notes, product requirements or handoff notes, hiring follow-up notes, or other. ThoroughLoop does not request or store external tool access tokens.
 
 ## Local Storage Boundary
 

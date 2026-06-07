@@ -1,3 +1,5 @@
+import type { ContextSourceId } from "./contextSources";
+
 export type WorkflowId =
   | "revenue-rescue"
   | "weekly-review"
@@ -35,6 +37,7 @@ export interface WorkflowDefinition {
 export interface FounderDiagnosis {
   id: string;
   createdAt: string;
+  contextSource: ContextSourceId;
   workflow: WorkflowDefinition;
   confidence: DiagnosisConfidence;
   matchedKeywords: string[];
@@ -54,6 +57,7 @@ export interface MemoAssumption {
 export interface SavedMemo {
   id: string;
   createdAt: string;
+  contextSource?: ContextSourceId;
   workflow: WorkflowName;
   title: string;
   problem: string;
@@ -73,6 +77,7 @@ export interface SavedMemo {
 export interface SavedFounderAction {
   id: string;
   createdAt: string;
+  contextSource?: ContextSourceId;
   workflow: WorkflowName;
   founderAction: string;
   whyItMatters: string;
@@ -89,6 +94,7 @@ export interface SavedFounderAction {
 export interface SavedDecision {
   id: string;
   createdAt: string;
+  contextSource?: ContextSourceId;
   workflow: WorkflowName;
   decisionRecommended: string;
   evidenceUsed: string;
