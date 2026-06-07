@@ -106,7 +106,11 @@ After ThoroughLoop:
 5. It saves one decision.
 6. The decision can be reviewed later.
 
+Users can label where pasted context came from, such as Slack, Notion, CRM notes, meeting notes, customer feedback, or requirements handoffs. ThoroughLoop does not read from or update external tools yet.
+
 The current diagnosis and memo behavior is deterministic product logic in `packages/core`. It does not call an AI provider or external model.
+
+For the source-aware manual import boundary, see [docs/source-aware-context-import.md](docs/source-aware-context-import.md).
 
 ## Example Founder Use Cases
 

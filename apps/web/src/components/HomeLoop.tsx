@@ -3,8 +3,12 @@
 import { useEffect, useMemo, useRef, useState, type ButtonHTMLAttributes, type ReactNode, type RefObject } from "react";
 import {
   DEFAULT_SETTINGS,
+  DEFAULT_CONTEXT_SOURCE_ID,
+  CONTEXT_SOURCE_OPTIONS,
   STORAGE_KEYS,
   appendCollectionItem,
+  contextSourceForId,
+  contextSourceLabelForId,
   createDiagnosis,
   formatDisplayDate,
   formatMemoForCopy,
@@ -13,6 +17,7 @@ import {
   memoToFounderAction,
   readCollection,
   readJson,
+  type ContextSourceId,
   type FounderDiagnosis,
   type SavedMemo,
   type Settings
@@ -25,6 +30,7 @@ type LoopStage = "landing" | "compose" | "thinking" | "result";
 type SampleLoop = {
   id: string;
   label: string;
+  sourceId: ContextSourceId;
   situation: string;
   preview: string;
   context: string;
@@ -55,6 +61,7 @@ const samples: SampleLoop[] = [
   {
     id: "stalled-pipeline",
     label: "Stalled pipeline",
+    sourceId: "crm_pipeline",
     situation: "Late-stage deals are stuck after pricing conversations.",
     preview: "FinCore is still circling pricing. BrightLayer ghosted after proposal. I keep adding leads but nothing is closing.",
     context:
@@ -63,6 +70,7 @@ const samples: SampleLoop[] = [
   {
     id: "onboarding-handoff",
     label: "Onboarding handoff",
+    sourceId: "meeting_notes",
     situation: "Closed customers are losing momentum before activation.",
     preview: "Sales says the customer is ready. Onboarding says requirements changed. Nobody owns the next milestone.",
     context:
@@ -71,6 +79,7 @@ const samples: SampleLoop[] = [
   {
     id: "hiring-confusion",
     label: "Hiring confusion",
+    sourceId: "hiring_followup",
     situation: "The hiring loop has candidates, but no clear decision owner.",
     preview: "Two strong candidates, three different opinions, and the role keeps changing every interview.",
     context:
@@ -79,6 +88,7 @@ const samples: SampleLoop[] = [
   {
     id: "product-feedback-overload",
     label: "Product feedback overload",
+    sourceId: "customer_feedback",
     situation: "Customer calls created more ideas than operating clarity.",
     preview: "Everyone heard something different. Roadmap, retention, and onboarding requests are now all fighting for the same week.",
     context:
@@ -87,10 +97,29 @@ const samples: SampleLoop[] = [
   {
     id: "investor-update-chaos",
     label: "Investor update chaos",
+    sourceId: "general_notes",
     situation: "The update has progress, risk, and asks mixed together.",
     preview: "We have wins, churn risk, runway notes, and hiring asks, but the investor story reads like a raw dump.",
     context:
       "The investor update needs board-ready metrics, runway notes, growth progress, churn risk, hiring asks, and one clear fundraising ask. The raw notes include wins, unresolved risks, and too many tactical details. The founder needs an investor-safe narrative without oversharing internal mess."
+  },
+  {
+    id: "requirements-handoff",
+    label: "Requirements handoff",
+    sourceId: "requirements_handoff",
+    situation: "Requirements are changing before the team can execute.",
+    preview: "Sales, product, and engineering are each seeing a different version of the onboarding ask.",
+    context:
+      "User feedback is spread across two calls, a Slack thread, and a product note. Sales says customers keep asking for faster onboarding, product says the request is too vague, and engineering says requirements keep changing after handoff. Nobody owns the clarification loop, so the same questions come back each sprint."
+  },
+  {
+    id: "founder-workflow-chaos",
+    label: "Founder workflow chaos",
+    sourceId: "general_notes",
+    situation: "Sales, hiring, and customer issues are moving at once.",
+    preview: "One sales follow-up, one hiring decision, and one customer escalation are competing for founder attention.",
+    context:
+      "Three active priorities are moving at once: one sales follow-up, one hiring decision, and one customer escalation. Updates are scattered across notes and chat messages. I know something is slipping, but I cannot tell whether the bottleneck is ownership, decision delay, or lack of follow-up rhythm."
   }
 ];
 
@@ -432,6 +461,7 @@ function SampleGrid({
           Mess-forward samples
         </p>
         <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">Start from real operating mess.</h2>
+        <p className="text-sm leading-6 text-slate-500">Fictional examples for demo use. Paste your own context to run the loop.</p>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {samples.map((sample) => (
@@ -506,6 +536,7 @@ function HistorySection({
         <div className="grid gap-3">
           {memos.map((memo) => {
             const reviewDate = reviewDateFromCreatedAt(memo.createdAt);
+            const sourceLabel = contextSourceLabelForId(memo.contextSource);
 
             return (
               <article key={memo.id} className="rounded-lg border border-white/10 bg-[#101820] p-4 shadow-dark-soft sm:p-5">
@@ -514,6 +545,9 @@ function HistorySection({
                     <div className="flex flex-wrap gap-2">
                       <span className="rounded-md border border-white/10 px-2 py-1 font-mono text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
                         {memo.workflow}
+                      </span>
+                      <span className="rounded-md border border-white/10 px-2 py-1 font-mono text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        Source · {sourceLabel}
                       </span>
                       <span className="rounded-md border border-[#d9a441]/30 bg-[#d9a441]/10 px-2 py-1 font-mono text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-[#f0c76c]">
                         Review · {formatReviewDate(reviewDate)}
@@ -555,18 +589,24 @@ function HistorySection({
 function Compose({
   rawInput,
   selectedSample,
+  selectedSourceId,
   textareaRef,
   onChange,
+  onSourceChange,
   onCloseLoop,
   onChangeSample
 }: {
   rawInput: string;
   selectedSample: SampleLoop | null;
+  selectedSourceId: ContextSourceId;
   textareaRef: RefObject<HTMLTextAreaElement>;
   onChange: (value: string) => void;
+  onSourceChange: (value: ContextSourceId) => void;
   onCloseLoop: () => void;
   onChangeSample: () => void;
 }) {
+  const source = contextSourceForId(selectedSourceId);
+
   return (
     <section className="mx-auto grid max-w-3xl gap-4 px-4 pb-28 pt-8 sm:px-5 sm:pt-12 lg:pt-16">
       <div className="grid gap-2">
@@ -584,6 +624,7 @@ function Compose({
           <span>
             Loaded: <span className="font-semibold text-white">{selectedSample.label}</span>
           </span>
+          <span className="text-slate-500">Source: {source.label}</span>
           <button
             type="button"
             onClick={onChangeSample}
@@ -593,6 +634,34 @@ function Compose({
           </button>
         </div>
       ) : null}
+
+      <div className="grid gap-3 rounded-lg border border-white/10 bg-[#101820] p-4 shadow-dark-soft">
+        <div className="grid gap-1">
+          <label
+            htmlFor="context-source"
+            className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-400"
+          >
+            Where is this context coming from?
+          </label>
+          <p className="text-sm leading-6 text-slate-500">
+            Manual import only. ThoroughLoop does not connect to external tools yet.
+          </p>
+        </div>
+        <select
+          id="context-source"
+          data-testid="context-source-select"
+          value={selectedSourceId}
+          onChange={(event) => onSourceChange(event.target.value as ContextSourceId)}
+          className="w-full rounded-md border border-white/10 bg-[#071016] px-3 py-2.5 text-sm font-semibold text-slate-100 outline-none transition focus:border-[#d9a441] focus:ring-2 focus:ring-[#d9a441]/20"
+        >
+          {CONTEXT_SOURCE_OPTIONS.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-sm leading-6 text-slate-400">{source.helperText}</p>
+      </div>
 
       <label className="grid gap-3">
         <span className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -605,7 +674,7 @@ function Compose({
           value={rawInput}
           onChange={(event) => onChange(event.target.value)}
           rows={10}
-          placeholder="Paste standup notes, call notes, investor draft fragments, hiring debate, customer blockers, or anything else that feels messy."
+          placeholder={source.placeholderText}
           className="min-h-[300px] rounded-lg border border-white/10 bg-[#101820] px-4 py-4 text-base leading-7 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-[#d9a441] focus:ring-2 focus:ring-[#d9a441]/20"
         />
       </label>
@@ -723,6 +792,7 @@ function Result({
 }) {
   const copy = useMemo(() => resultCopyForWorkflow(diagnosis, selectedSampleId), [diagnosis, selectedSampleId]);
   const reviewDate = memoToDecision(memo).reviewDate;
+  const sourceLabel = contextSourceLabelForId(memo.contextSource ?? diagnosis.contextSource);
 
   return (
     <section className="mx-auto grid max-w-4xl gap-4 px-4 pb-32 pt-8 sm:px-5 sm:pt-12 lg:pt-16">
@@ -733,6 +803,9 @@ function Result({
           </span>
           <span className="rounded-md border border-white/10 px-2 py-1 font-mono text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
             {formatDisplayDate(diagnosis.createdAt)}
+          </span>
+          <span className="rounded-md border border-white/10 px-2 py-1 font-mono text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            Source · {sourceLabel}
           </span>
         </div>
         <p className="mt-5 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
@@ -838,6 +911,7 @@ export function HomeLoop() {
   const [memo, setMemo] = useState<SavedMemo | null>(null);
   const [savedMemos, setSavedMemos] = useState<SavedMemo[]>([]);
   const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null);
+  const [selectedSourceId, setSelectedSourceId] = useState<ContextSourceId>(DEFAULT_CONTEXT_SOURCE_ID);
   const [copiedMemo, setCopiedMemo] = useState(false);
   const [copiedHistoryMemoId, setCopiedHistoryMemoId] = useState("");
   const [savedCurrentLoop, setSavedCurrentLoop] = useState(false);
@@ -871,7 +945,7 @@ export function HomeLoop() {
     }
 
     const thinkingTimer = window.setTimeout(() => {
-      const nextDiagnosis = createDiagnosis(rawInput);
+      const nextDiagnosis = createDiagnosis(rawInput, undefined, selectedSourceId);
       const generatedMemo = generateFounderMemo(nextDiagnosis, settings);
       const nextMemo = memoForResult(nextDiagnosis, generatedMemo, selectedSampleId);
 
@@ -883,14 +957,18 @@ export function HomeLoop() {
     }, THINKING_DELAY_MS);
 
     return () => window.clearTimeout(thinkingTimer);
-  }, [rawInput, selectedSampleId, settings, stage]);
+  }, [rawInput, selectedSampleId, selectedSourceId, settings, stage]);
 
   function openCompose() {
+    setRawInput("");
+    setSelectedSampleId(null);
+    setSelectedSourceId(DEFAULT_CONTEXT_SOURCE_ID);
     setStage("compose");
   }
 
   function useSample(sample: SampleLoop) {
     setSelectedSampleId(sample.id);
+    setSelectedSourceId(sample.sourceId);
     setRawInput(sample.context);
     setStage("compose");
   }
@@ -947,6 +1025,7 @@ export function HomeLoop() {
   function startNewLoop() {
     setRawInput("");
     setSelectedSampleId(null);
+    setSelectedSourceId(DEFAULT_CONTEXT_SOURCE_ID);
     setDiagnosis(null);
     setMemo(null);
     setCopiedMemo(false);
@@ -963,8 +1042,10 @@ export function HomeLoop() {
       <Compose
         rawInput={rawInput}
         selectedSample={selectedSample}
+        selectedSourceId={selectedSourceId}
         textareaRef={textareaRef}
         onChange={setRawInput}
+        onSourceChange={setSelectedSourceId}
         onCloseLoop={closeLoop}
         onChangeSample={changeSample}
       />

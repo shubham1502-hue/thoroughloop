@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   STORAGE_KEYS,
+  contextSourceLabelForId,
   readCollection,
   removeCollectionItem,
   replaceCollectionItem,
@@ -57,7 +58,9 @@ export function DecisionLog() {
               <div className="grid gap-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-muted">{decision.workflow}</p>
+                    <p className="text-sm font-semibold text-muted">
+                      {decision.workflow} | Source: {contextSourceLabelForId(decision.contextSource)}
+                    </p>
                     <h2 className="mt-1 text-xl font-semibold sm:text-2xl">{decision.decisionRecommended}</h2>
                   </div>
                   <button

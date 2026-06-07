@@ -22,6 +22,7 @@ The web app should stay thin. Product logic should remain in `packages/core`.
 
 - Workflow definitions
 - Types for diagnoses, memos, founder actions, decisions, and settings
+- Source metadata for manually pasted founder context
 - Storage keys and storage adapter interface
 - Workflow detection
 - Risk signal extraction
@@ -64,6 +65,14 @@ The visible product name is ThoroughLoop, but the local storage keys intentional
 - `founder_os_lite_settings`
 
 This protects compatibility with saved local data from the previous working name.
+
+## Source-Aware Context Import
+
+The main browser loop lets a user manually label where pasted context came from before running the diagnosis. Supported labels include general founder notes, Slack thread or channel notes, Notion page or workspace notes, CRM or sales pipeline notes, customer feedback, meeting notes, product requirements or handoff notes, hiring follow-up notes, and other.
+
+This source label is metadata on the diagnosis, memo, founder action, and decision records. It does not change the local-first storage boundary, and it does not create provider ingestion, OAuth, background sync, or automatic extraction from external tools.
+
+Saved loops created before this field existed remain valid because `contextSource` is optional on saved records. Rendering code falls back to General founder notes when the field is absent.
 
 ## Why No Production Persistence Yet
 

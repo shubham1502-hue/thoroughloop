@@ -1,3 +1,4 @@
+import { contextSourceLabelForId } from "./contextSources";
 import { nextWeekIsoDate, nowIsoString, tomorrowIsoDate } from "./date";
 import type {
   FounderDiagnosis,
@@ -73,8 +74,9 @@ function evidenceFromDiagnosis(diagnosis: FounderDiagnosis): string {
     : "None detected";
   const keywords = diagnosis.matchedKeywords.length ? diagnosis.matchedKeywords.join(", ") : "No strong keyword cluster";
   const signals = diagnosis.extractedRiskSignals.join("; ");
+  const source = contextSourceLabelForId(diagnosis.contextSource);
 
-  return `Workflow evidence: ${diagnosis.workflow.name}. Matched keywords: ${keywords}. Extracted companies or deal names: ${companies}. Risk signals: ${signals}.`;
+  return `Source: ${source}. Workflow evidence: ${diagnosis.workflow.name}. Matched keywords: ${keywords}. Extracted companies or deal names: ${companies}. Risk signals: ${signals}.`;
 }
 
 function assumptionsFromMissingContext(diagnosis: FounderDiagnosis): MemoAssumption[] {
@@ -100,6 +102,7 @@ export function generateFounderMemo(
   return {
     id: createId("memo"),
     createdAt: nowIsoString(),
+    contextSource: diagnosis.contextSource,
     workflow,
     title: `${workflow} memo for ${subject}`,
     problem,
@@ -121,6 +124,7 @@ export function memoToFounderAction(memo: SavedMemo): SavedFounderAction {
   return {
     id: createId("action"),
     createdAt: nowIsoString(),
+    contextSource: memo.contextSource,
     workflow: memo.workflow,
     founderAction: memo.founderAction,
     whyItMatters: memo.diagnosis,
@@ -139,6 +143,7 @@ export function memoToDecision(memo: SavedMemo): SavedDecision {
   return {
     id: createId("decision"),
     createdAt: nowIsoString(),
+    contextSource: memo.contextSource,
     workflow: memo.workflow,
     decisionRecommended: memo.recommendedDecision,
     evidenceUsed: memo.evidence,
@@ -162,6 +167,7 @@ export function formatMemoForCopy(memo: SavedMemo): string {
   return [
     memo.title,
     "",
+    `Source\n${contextSourceLabelForId(memo.contextSource)}`,
     `Problem\n${memo.problem}`,
     `Evidence\n${memo.evidence}`,
     `Diagnosis\n${memo.diagnosis}`,

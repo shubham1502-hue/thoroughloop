@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   STORAGE_KEYS,
   WORKFLOWS,
+  contextSourceLabelForId,
   formatDisplayDate,
   formatMemoForCopy,
   readCollection,
@@ -30,7 +31,14 @@ export function SavedMemos() {
       const matchesWorkflow = workflow === "All" || memo.workflow === workflow;
       const matchesSearch =
         !query ||
-        [memo.title, memo.problem, memo.recommendedDecision, memo.founderAction, memo.investorSafeSummary]
+        [
+          memo.title,
+          memo.problem,
+          memo.recommendedDecision,
+          memo.founderAction,
+          memo.investorSafeSummary,
+          contextSourceLabelForId(memo.contextSource)
+        ]
           .join(" ")
           .toLowerCase()
           .includes(query);
@@ -84,7 +92,7 @@ export function SavedMemos() {
                 <div>
                   <h2 className="text-xl font-semibold sm:text-2xl">{memo.title}</h2>
                   <p className="mt-1 text-sm text-muted">
-                    {memo.workflow} | {formatDisplayDate(memo.createdAt)}
+                    {memo.workflow} | Source: {contextSourceLabelForId(memo.contextSource)} | {formatDisplayDate(memo.createdAt)}
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">

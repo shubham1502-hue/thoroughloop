@@ -8,6 +8,7 @@ import {
   memoToDecision,
   memoToFounderAction,
   normalizeIntakeRequest,
+  runIntakeFlow,
   type IntakeNormalizationResult,
   type OperatingSignal
 } from "../src/index";
@@ -87,6 +88,26 @@ describe("integration intake normalization", () => {
     assert.equal(signal.source, "slack");
     assert.ok(signal.adapterNotes.includes("Slack note normalized for scattered operating context."));
     assert.match(signal.context, /onboarding is blocked/);
+  });
+
+  it("maps existing intake sources into saved loop source metadata", () => {
+    const result = runIntakeFlow({
+      source: "slack",
+      context:
+        "Slack thread says onboarding is blocked, customer owner is unclear, and founder follow-up is needed."
+    });
+
+    assert.equal(result.ok, true);
+
+    if (!result.ok) {
+      throw new Error(result.error.message);
+    }
+
+    assert.equal(result.data.signal.source, "slack");
+    assert.equal(result.data.diagnosis.contextSource, "slack");
+    assert.equal(result.data.memo.contextSource, "slack");
+    assert.equal(result.data.founderAction.contextSource, "slack");
+    assert.equal(result.data.decision.contextSource, "slack");
   });
 
   it("normalizes valid Google Sheets payloads", () => {

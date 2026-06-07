@@ -1,3 +1,4 @@
+import { normalizeContextSourceId, type ContextSourceId } from "./contextSources";
 import { nowIsoString } from "./date";
 import type { DiagnosisConfidence, FounderDiagnosis, WorkflowDefinition, WorkflowId } from "./types";
 import { getWorkflowById, WORKFLOWS } from "./workflows";
@@ -114,7 +115,11 @@ export function extractCompanyOrDealNames(rawInput: string): string[] {
   );
 }
 
-export function createDiagnosis(rawInput: string, forcedWorkflowId?: WorkflowId): FounderDiagnosis {
+export function createDiagnosis(
+  rawInput: string,
+  forcedWorkflowId?: WorkflowId,
+  contextSource?: ContextSourceId
+): FounderDiagnosis {
   const detected = forcedWorkflowId
     ? {
         workflow: getWorkflowById(forcedWorkflowId),
@@ -126,6 +131,7 @@ export function createDiagnosis(rawInput: string, forcedWorkflowId?: WorkflowId)
   return {
     id: createId("diagnosis"),
     createdAt: nowIsoString(),
+    contextSource: normalizeContextSourceId(contextSource),
     workflow: detected.workflow,
     confidence: detected.confidence,
     matchedKeywords: detected.matchedKeywords,
