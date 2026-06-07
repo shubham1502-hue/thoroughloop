@@ -111,3 +111,28 @@ Examples:
 6. Review patterns weekly in `docs/founder-learning-journal.md`.
 7. Run a monthly synthesis using `docs/founder-validation-retrospective-template.md`.
 8. Only update public positioning after repeated evidence supports the change.
+
+## Evidence Captured - 2026-06-07
+
+This section captures early LinkedIn outreach feedback. It is not founder validation.
+
+### Pain Evidence
+
+- Moinul founder-side workflow chaos resonance. Evidence type: pain resonance. Evidence strength: medium-high. Caveat: this is not yet usage intent or validation.
+
+### Workflow Evidence
+
+- Sai Rohit said requirements get messy first and technical handoffs later. Evidence type: workflow insight. Evidence strength: medium. Caveat: this is operator/builder workflow feedback, not founder validation.
+
+### Curiosity Evidence
+
+- Rajasekaran asked to know more about GTM and operational challenges being solved.
+- Sidharth asked what Shubham is working on now.
+- Salam showed interest in what Shubham is building and in climate-tech AI/data systems.
+- Abhay said "Would love to know more."
+
+### Non-Evidence Or Weak Evidence
+
+- Generic replies such as "Interesting", "Thanks", "Sounds interesting", and "Hi Shubham".
+
+Generic positive replies should not be counted as validation.
