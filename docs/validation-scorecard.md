@@ -13,6 +13,20 @@ Use this scorecard to track founder validation progress without claiming tractio
 | Strong signals | 0 |  |
 | Weak signals | 0 |  |
 
+## Early Outreach Snapshot - 2026-06-07
+
+This snapshot tracks early LinkedIn outreach replies. It is not founder validation and should not be converted into public validation claims.
+
+| Metric | Count | Notes |
+| --- | ---: | --- |
+| Strong pain resonance | 1 | Moinul |
+| Concrete workflow insight | 1 | Sai Rohit |
+| Meaningful curiosity replies | 4 | Rajasekaran, Sidharth, Salam, Abhay |
+| Low-signal positive or polite replies | 9 | Do not count as validation |
+| Completed founder demos | 0 | No documented demo yet |
+| Confirmed weekly usage intent | 0 | Not proven |
+| Validated founder demand | 0 | Not proven |
+
 ## Founders Contacted
 
 | Date | Segment | Channel | Status | Notes |
