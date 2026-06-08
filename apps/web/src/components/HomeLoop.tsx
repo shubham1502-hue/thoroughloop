@@ -667,6 +667,9 @@ function Compose({
         <span className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-400">
           Founder context
         </span>
+        <p className="text-sm leading-6 text-slate-500">
+          Public demo note: use fictional or sanitized context. Avoid confidential production data.
+        </p>
         <textarea
           ref={textareaRef}
           data-testid="messy-context-input"
