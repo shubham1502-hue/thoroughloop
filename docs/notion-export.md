@@ -4,6 +4,8 @@
 
 ThoroughLoop lets founders export a generated founder memo directly to a Notion database with one click. The integration uses the Notion API v1 via a server-side Next.js API route so credentials never reach the browser.
 
+This is outbound export only. ThoroughLoop does not import from Notion, sync with Notion, read Notion pages, use Notion as the app's persistence layer, or request external provider OAuth in the public MVP.
+
 ## Environment variables
 
 | Variable            | Description                                      | Required |

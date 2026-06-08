@@ -14,6 +14,7 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await page.getByLabel("Where is this context coming from?").selectOption("notion");
   await expect(page.getByText("Paste the relevant Notion notes, decisions, or project context.")).toBeVisible();
   await expect(page.getByText("Manual import only. ThoroughLoop does not connect to external tools yet.")).toBeVisible();
+  await expect(page.getByText("Public demo note: use fictional or sanitized context. Avoid confidential production data.")).toBeVisible();
   await page.getByTestId("context-source-select").selectOption("slack");
   await expect(page.getByText("Paste the relevant Slack messages or thread summary.")).toBeVisible();
   await page.getByTestId("messy-context-input").fill(messyFounderContext);

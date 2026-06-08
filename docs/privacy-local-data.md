@@ -29,6 +29,8 @@ Pasted founder context in the main browser loop is processed locally in the app 
 
 Source-aware import is manual labeling only. A user can choose a label such as Slack thread or channel notes, Notion page or workspace notes, CRM or sales pipeline notes, customer feedback, meeting notes, product requirements or handoff notes, hiring follow-up notes, or other. ThoroughLoop does not request or store external tool access tokens.
 
+A Notion source label means manually pasted Notion context. It does not import from Notion, sync with Notion, or use Notion as the app's persistence layer.
+
 ## Local Storage Boundary
 
 Saved data is device-specific. Clearing browser storage may remove saved memos, founder actions, decisions, and settings.
@@ -39,7 +41,9 @@ Optional Notion export requires explicit environment configuration and user acti
 
 ## Public Demo Guidance
 
-Avoid pasting sensitive production data into public demos, screenshots, bug reports, or issues. Use synthetic examples from `docs/demo-examples.md` when possible.
+The public demo is intended for fictional or sanitized context. Avoid pasting confidential production data into public demos, screenshots, bug reports, or issues.
+
+Source labels and saved loops remain local according to the current browser storage boundary. Use synthetic examples from `docs/demo-examples.md` when possible.
 
 ## Compliance Boundary
 
