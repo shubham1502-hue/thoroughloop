@@ -74,10 +74,15 @@ async function main() {
     await page.evaluate(() => window.scrollTo(0, 0));
     await capture(page, "05-generated-diagnosis.png");
 
+    await page.locator("[data-testid='supporting-context']").evaluate((element) => {
+      if (element instanceof HTMLDetailsElement) {
+        element.open = true;
+      }
+    });
     await scrollToLocator(page, page.getByText("Why this is the bottleneck"));
     await capture(page, "06-founder-memo-evidence.png");
 
-    await scrollToLocator(page, page.getByText("Founder action this week"));
+    await scrollToLocator(page, page.getByText("This week's action"));
     await capture(page, "07-founder-action-decision.png");
 
     await page.getByRole("button", { name: "Save loop" }).click();

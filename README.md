@@ -40,23 +40,23 @@ ThoroughLoop separates signal, evidence, missing context, action, and review dec
 
 ![Thinking state separating signal, evidence, missing context, action, and review decision.](docs/assets/screenshots/04-thinking-state.png)
 
-### 5. Review the diagnosis
+### 5. Review the action and decision
 
-The result starts with one bottleneck diagnosis and a short TL;DR.
+The result now leads with one founder action for this week and one decision to review next week.
 
-![Generated diagnosis and TL;DR from the fictional sample context.](docs/assets/screenshots/05-generated-diagnosis.png)
+![Generated result prioritizing founder action and review decision.](docs/assets/screenshots/05-generated-diagnosis.png)
 
-### 6. Inspect the memo evidence
+### 6. Inspect the supporting context
 
-The memo explains why this is the bottleneck, what evidence came from the context, and what context is still missing.
+Supporting diagnosis details remain available below the action and review decision.
 
-![Memo evidence, bottleneck reasoning, and missing context.](docs/assets/screenshots/06-founder-memo-evidence.png)
+![Supporting context with bottleneck reasoning, evidence from notes, and missing context.](docs/assets/screenshots/06-founder-memo-evidence.png)
 
-### 7. Turn the memo into action and decision
+### 7. Review the focused execution cards
 
-The app converts messy context into one founder action for this week and one decision to review next week.
+The action and review decision stay visible as the main operating output.
 
-![Founder action this week and decision to review next week.](docs/assets/screenshots/07-founder-action-decision.png)
+![This week's action and decision to review next week.](docs/assets/screenshots/07-founder-action-decision.png)
 
 ### 8. Save the loop for review
 
