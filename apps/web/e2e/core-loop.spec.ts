@@ -1,7 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const messyFounderContext =
   "FinCore Labs has been stuck in negotiation for 21 days after a pricing concern. BrightLayer AI has no reply after proposal for 12 days. Northstar Ops completed demo but is waiting for review. Founder follow-up is slipping and proposal-stage deals need attention this week.";
+
+async function expectTextOrder(page: Page, firstText: string, secondText: string) {
+  const order = await page.evaluate(
+    ({ firstText, secondText }) => {
+      const text = document.body.innerText;
+      return text.indexOf(firstText) !== -1 && text.indexOf(secondText) !== -1 && text.indexOf(firstText) < text.indexOf(secondText);
+    },
+    { firstText, secondText }
+  );
+
+  expect(order).toBe(true);
+}
 
 test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await page.goto("/");
@@ -25,6 +37,17 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByText("Source · Slack thread or channel notes")).toBeVisible();
   await expect(page.getByText("Sit in on the next two discovery calls")).toBeVisible();
   await expect(page.getByText("Review ·")).toBeVisible();
+  await expect(page.getByTestId("primary-action-review")).toBeVisible();
+  await expect(page.getByTestId("short-diagnosis")).toBeVisible();
+  await expect(page.getByTestId("supporting-context")).toBeVisible();
+  await expectTextOrder(page, "This week's action", "Supporting context");
+  await expectTextOrder(page, "Decision to review next week", "Supporting context");
+  await expectTextOrder(page, "Short diagnosis", "Supporting context");
+
+  await page.locator("[data-testid='supporting-context'] summary").click();
+  await expect(page.getByText("Why this is the bottleneck")).toBeVisible();
+  await expect(page.getByText("Evidence from your notes")).toBeVisible();
+  await expect(page.getByText("Missing context")).toBeVisible();
 
   await page.getByRole("button", { name: "Save loop" }).click();
   await expect(page.getByRole("button", { name: "Loop saved" })).toBeVisible();
@@ -38,6 +61,17 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Saved founder memos" })).toBeVisible();
   await expect(page.getByText("Discovery quality, not pricing.")).toBeVisible();
   await expect(page.getByText("Source: Slack thread or channel notes")).toBeVisible();
+  const savedMemoOrder = await page.getByTestId("saved-memo-detail-grid").evaluate((grid) => {
+    const text = grid.textContent ?? "";
+    return (
+      text.indexOf("Founder action") !== -1 &&
+      text.indexOf("Recommended decision") !== -1 &&
+      text.indexOf("Problem") !== -1 &&
+      text.indexOf("Founder action") < text.indexOf("Recommended decision") &&
+      text.indexOf("Recommended decision") < text.indexOf("Problem")
+    );
+  });
+  expect(savedMemoOrder).toBe(true);
 
   await page.reload();
   await expect(page.getByText("Discovery quality, not pricing.")).toBeVisible();

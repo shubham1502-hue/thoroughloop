@@ -108,18 +108,18 @@ export function SavedMemos() {
                   </button>
                 </div>
               </div>
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div data-testid="saved-memo-detail-grid" className="mt-5 grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm font-semibold">Problem</p>
-                  <p className="mt-1 text-sm leading-6 text-muted">{memo.problem}</p>
+                  <p className="text-sm font-semibold">Founder action</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">{memo.founderAction}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Recommended decision</p>
                   <p className="mt-1 text-sm leading-6 text-muted">{memo.recommendedDecision}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">Founder action</p>
-                  <p className="mt-1 text-sm leading-6 text-muted">{memo.founderAction}</p>
+                  <p className="text-sm font-semibold">Problem</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">{memo.problem}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Investor-safe summary</p>

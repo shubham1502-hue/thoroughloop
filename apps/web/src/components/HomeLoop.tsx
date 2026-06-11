@@ -725,7 +725,7 @@ function ActionDecisionPair({
     <div className="grid gap-4 lg:grid-cols-2">
       <article className="rounded-lg border border-[#d9a441]/25 bg-[#181b16] p-4 shadow-dark-soft sm:p-5">
         <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
-          Founder action this week
+          This week&apos;s action
         </p>
         <h3 className="mt-3 text-xl font-semibold leading-7 text-white">{copy.action.command}</h3>
         <div className="mt-4 grid gap-3 text-sm leading-6 text-slate-300">
@@ -761,6 +761,68 @@ function ActionDecisionPair({
         </div>
       </article>
     </div>
+  );
+}
+
+function ShortDiagnosis({ copy }: { copy: ResultCopy }) {
+  return (
+    <section data-testid="short-diagnosis" className="rounded-lg border border-white/10 bg-[#101820] p-4 shadow-dark-soft sm:p-5">
+      <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
+        Short diagnosis
+      </p>
+      <h2 className="mt-3 font-serif text-2xl font-semibold leading-tight text-white sm:text-3xl">{copy.diagnosis}</h2>
+      <p className="mt-4 rounded-lg border border-[#d9a441]/25 bg-[#d9a441]/10 px-4 py-3 text-sm font-semibold text-[#f0c76c]">
+        TL;DR: {copy.tldr}
+      </p>
+    </section>
+  );
+}
+
+function SupportingContext({ copy }: { copy: ResultCopy }) {
+  return (
+    <details
+      data-testid="supporting-context"
+      className="group rounded-lg border border-white/10 bg-[#101820] p-4 text-slate-300 shadow-dark-soft sm:p-5"
+    >
+      <summary className="cursor-pointer list-none font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441] marker:hidden">
+        <span className="inline-flex items-center gap-2">
+          Supporting context
+          <span className="font-sans text-xs normal-case tracking-normal text-slate-500 group-open:hidden">Show details</span>
+          <span className="hidden font-sans text-xs normal-case tracking-normal text-slate-500 group-open:inline">Hide details</span>
+        </span>
+      </summary>
+      <div className="mt-4 grid gap-4">
+        <Section title="Why this is the bottleneck">
+          <ul className="grid gap-2">
+            {copy.why.map((item) => (
+              <li key={item} className="pl-4 before:-ml-4 before:mr-2 before:text-[#d9a441] before:content-['-']">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        <Section title="Evidence from your notes">
+          <ul className="grid gap-2">
+            {copy.evidence.map((item) => (
+              <li key={item} className="pl-4 before:-ml-4 before:mr-2 before:text-[#d9a441] before:content-['-']">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        <Section title="Missing context" muted>
+          <ul className="grid gap-2">
+            {copy.missing.map((item) => (
+              <li key={item} className="pl-4 before:-ml-4 before:mr-2 before:text-slate-600 before:content-['-']">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      </div>
+    </details>
   );
 }
 
@@ -811,46 +873,21 @@ function Result({
             Source · {sourceLabel}
           </span>
         </div>
-        <p className="mt-5 font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
-          Diagnosis
-        </p>
-        <h1 className="mt-2 font-serif text-3xl font-semibold leading-tight text-white sm:text-5xl">{copy.diagnosis}</h1>
-        <p className="mt-4 rounded-lg border border-[#d9a441]/25 bg-[#d9a441]/10 px-4 py-3 text-sm font-semibold text-[#f0c76c]">
-          TL;DR: {copy.tldr}
+        <h1 className="mt-3 font-serif text-3xl font-semibold leading-tight text-white sm:text-4xl">
+          This week&apos;s action and next review
+        </h1>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400">
+          Start with the action and review decision. Supporting diagnosis details sit below.
         </p>
       </header>
 
-      <Section title="Why this is the bottleneck">
-        <ul className="grid gap-2">
-          {copy.why.map((item) => (
-            <li key={item} className="pl-4 before:-ml-4 before:mr-2 before:text-[#d9a441] before:content-['-']">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </Section>
+      <div data-testid="primary-action-review">
+        <ActionDecisionPair copy={copy} reviewDate={reviewDate} />
+      </div>
 
-      <Section title="Evidence from your context">
-        <ul className="grid gap-2">
-          {copy.evidence.map((item) => (
-            <li key={item} className="pl-4 before:-ml-4 before:mr-2 before:text-[#d9a441] before:content-['-']">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </Section>
+      <ShortDiagnosis copy={copy} />
 
-      <Section title="Missing context" muted>
-        <ul className="grid gap-2">
-          {copy.missing.map((item) => (
-            <li key={item} className="pl-4 before:-ml-4 before:mr-2 before:text-slate-600 before:content-['-']">
-              {item}
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <ActionDecisionPair copy={copy} reviewDate={reviewDate} />
+      <SupportingContext copy={copy} />
 
       <Section title="Investor-safe summary">
         <p>{copy.investorSummary}</p>

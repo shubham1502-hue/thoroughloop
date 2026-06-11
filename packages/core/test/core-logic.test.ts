@@ -207,12 +207,23 @@ describe("memo generation", () => {
   it("keeps the copyable memo structured and concise enough for founder review", () => {
     const memo = generateFounderMemo(createDiagnosis(""));
     const copy = formatMemoForCopy(memo);
+    const sourceIndex = copy.indexOf("Source\n");
+    const actionIndex = copy.indexOf("Founder action\n");
+    const decisionIndex = copy.indexOf("Recommended decision\n");
+    const problemIndex = copy.indexOf("Problem\n");
+    const diagnosisIndex = copy.indexOf("Diagnosis\n");
+    const evidenceIndex = copy.indexOf("Evidence\n");
 
     assert.match(copy, /Problem\n/);
     assert.match(copy, /Diagnosis\n/);
     assert.match(copy, /Founder action\n/);
     assert.match(copy, /Recommended decision\n/);
     assert.match(copy, /Metric to watch\n/);
+    assert.ok(sourceIndex < actionIndex);
+    assert.ok(actionIndex < decisionIndex);
+    assert.ok(decisionIndex < problemIndex);
+    assert.ok(problemIndex < diagnosisIndex);
+    assert.ok(diagnosisIndex < evidenceIndex);
     assert.ok(memo.assumptionsMade.length > 0);
     assert.ok(copy.length < 5000);
   });
