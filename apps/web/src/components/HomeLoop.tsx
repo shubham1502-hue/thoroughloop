@@ -69,12 +69,12 @@ const samples: SampleLoop[] = [
   },
   {
     id: "onboarding-handoff",
-    label: "Onboarding handoff",
+    label: "Team meeting minutes",
     sourceId: "meeting_notes",
-    situation: "Closed customers are losing momentum before activation.",
-    preview: "Sales says the customer is ready. Onboarding says requirements changed. Nobody owns the next milestone.",
+    situation: "A team meeting produced actions, blockers, and decisions, but no clear owner or review loop.",
+    preview: "Growth wants more leads, product says onboarding is leaking, and no one owns the review decision.",
     context:
-      "BrightLayer AI is closed-won but onboarding is blocked. Sales promised a fast go-live, onboarding says requirements changed, and the customer success owner is waiting on implementation details. The customer has not activated, the next milestone is unclear, and the founder keeps getting pulled into status calls."
+      "Growth meeting notes: paid campaigns are producing leads, but sales says quality is mixed. Product says onboarding drop-off is still high. Customer success says handoffs are unclear after the first call. The founder asked for one owner, but no one closed the loop. Need to decide whether to fix onboarding first or keep scaling acquisition."
   },
   {
     id: "hiring-confusion",
@@ -187,10 +187,10 @@ function resultCopyForWorkflow(
   const riskSignals = diagnosis.extractedRiskSignals.filter((signal) => !signal.toLowerCase().includes("too thin"));
   const companies = diagnosis.extractedCompaniesOrDeals.length
     ? `Named context: ${diagnosis.extractedCompaniesOrDeals.join(", ")}.`
-    : "No company or deal name was clearly detected.";
+    : "No named company, deal, role, or project was clearly detected.";
   const keywords = diagnosis.matchedKeywords.length
-    ? `Signal cluster: ${diagnosis.matchedKeywords.slice(0, 5).join(", ")}.`
-    : "No strong keyword cluster was detected.";
+    ? `Operating signals: ${diagnosis.matchedKeywords.slice(0, 5).join(", ")}.`
+    : "The notes were too thin to produce strong operating signals.";
   const evidence = [...riskSignals.slice(0, 3), companies, keywords].slice(0, 4);
   const missing = diagnosis.missingContext.slice(0, 4);
   const common = {

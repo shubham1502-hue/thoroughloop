@@ -34,9 +34,11 @@ export const CONTEXT_SOURCE_OPTIONS = [
   },
   {
     id: "meeting_notes",
-    label: "Meeting notes",
-    helperText: "Paste raw meeting notes or call summaries.",
-    placeholderText: "Paste raw meeting notes, call summaries, open questions, decisions, or owners."
+    label: "Meeting minutes or call notes",
+    helperText:
+      "Paste meeting minutes, call notes, or transcript-style notes. ThoroughLoop will look for actions, decisions, blockers, owners, and follow-up points.",
+    placeholderText:
+      "Paste meeting minutes, call notes, decisions, blockers, owners, open questions, follow-ups, or next-review points."
   },
   {
     id: "requirements_handoff",

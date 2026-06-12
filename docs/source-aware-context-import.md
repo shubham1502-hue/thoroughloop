@@ -36,7 +36,7 @@ A Notion source label means the user manually pasted Notion notes into the compo
 - Notion page or workspace notes
 - CRM or sales pipeline notes
 - Customer feedback
-- Meeting notes
+- Meeting minutes or call notes
 - Product requirements or handoff notes
 - Hiring follow-up notes
 - Other
@@ -52,6 +52,8 @@ Example:
 - Output: one diagnosis, one founder memo, one founder action, and one decision to review later
 
 The selected label is stored as loop metadata when the user saves the loop.
+
+Meeting minutes or call notes are supported as manually pasted context. The user can paste minutes, call notes, decisions, blockers, owners, open questions, and follow-up points. This is not file upload, meeting recording import, calendar import, or meeting-tool sync.
 
 ## Privacy Boundary
 
