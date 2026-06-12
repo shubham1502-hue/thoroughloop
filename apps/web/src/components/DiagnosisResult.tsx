@@ -57,15 +57,15 @@ export function DiagnosisPreview({
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <p className="text-sm font-semibold text-white">Matched keywords</p>
+          <p className="text-sm font-semibold text-white">Operating signals</p>
           <TagList values={diagnosis.matchedKeywords} emptyLabel="No strong match" />
         </div>
         <div className="grid gap-2">
-          <p className="text-sm font-semibold text-white">Extracted companies or deal names</p>
+          <p className="text-sm font-semibold text-white">Named context</p>
           <TagList values={diagnosis.extractedCompaniesOrDeals} emptyLabel="None detected" />
         </div>
         <div className="grid gap-2">
-          <p className="text-sm font-semibold text-white">Extracted risk signals</p>
+          <p className="text-sm font-semibold text-white">Risk signals</p>
           <TagList values={diagnosis.extractedRiskSignals} emptyLabel="Context is too thin to extract strong risk signals" />
         </div>
         <div className="grid gap-2">

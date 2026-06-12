@@ -5,6 +5,7 @@ import {
   createDiagnosis,
   CONTEXT_SOURCE_OPTIONS,
   DEFAULT_CONTEXT_SOURCE_ID,
+  contextSourceForId,
   contextSourceLabelForId,
   extractCompanyOrDealNames,
   extractRiskSignals,
@@ -109,11 +110,21 @@ describe("context source metadata", () => {
       "Notion page or workspace notes",
       "CRM or sales pipeline notes",
       "Customer feedback",
-      "Meeting notes",
+      "Meeting minutes or call notes",
       "Product requirements or handoff notes",
       "Hiring follow-up notes",
       "Other"
     ]);
+  });
+
+  it("keeps meeting minutes as a manual paste source", () => {
+    const source = contextSourceForId("meeting_notes");
+    const copy = `${source.label} ${source.helperText} ${source.placeholderText ?? ""}`;
+
+    assert.equal(source.label, "Meeting minutes or call notes");
+    assert.match(source.helperText, /Paste meeting minutes, call notes, or transcript-style notes/);
+    assert.match(source.placeholderText ?? "", /decisions, blockers, owners, open questions, follow-ups/);
+    assert.doesNotMatch(copy, /\b(import|sync|upload|connect)\b/i);
   });
 
   it("falls back safely for unknown source ids", () => {
@@ -136,7 +147,7 @@ describe("context source metadata", () => {
     assert.equal(memo.contextSource, "slack");
     assert.equal(action.contextSource, "slack");
     assert.equal(decision.contextSource, "slack");
-    assert.match(memo.evidence, /Source: Slack thread or channel notes/);
+    assert.match(memo.evidence, /Source label: Slack thread or channel notes/);
     assert.match(copy, /Source\nSlack thread or channel notes/);
   });
 
@@ -196,6 +207,10 @@ describe("memo generation", () => {
     assert.equal(memo.owner, "Shubham");
     assert.match(memo.diagnosis, /Revenue Rescue/);
     assert.match(memo.evidence, /Risk signals:/);
+    assert.match(memo.evidence, /Named context: FinCore Labs/);
+    assert.match(memo.evidence, /Operating signals: .*proposal/);
+    assert.match(memo.evidence, /Source label: General founder notes/);
+    assert.doesNotMatch(memo.evidence, /Matched keywords|Extracted companies|Workflow evidence/);
     assert.match(memo.founderAction, /founder-led follow-up/i);
     assert.match(memo.recommendedDecision, /Decide whether/i);
     assert.equal(action.sourceMemoId, memo.id);
@@ -226,6 +241,14 @@ describe("memo generation", () => {
     assert.ok(diagnosisIndex < evidenceIndex);
     assert.ok(memo.assumptionsMade.length > 0);
     assert.ok(copy.length < 5000);
+  });
+
+  it("uses a human-readable evidence fallback for thin notes", () => {
+    const memo = generateFounderMemo(createDiagnosis(""));
+
+    assert.match(memo.evidence, /The notes were too thin to produce strong operating evidence/);
+    assert.match(memo.evidence, /Source label: General founder notes/);
+    assert.doesNotMatch(memo.evidence, /Matched keywords|Extracted companies|Workflow evidence/);
   });
 });
 

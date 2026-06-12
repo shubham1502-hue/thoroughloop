@@ -3,13 +3,19 @@ import { expect, test, type Page } from "@playwright/test";
 const messyFounderContext =
   "FinCore Labs has been stuck in negotiation for 21 days after a pricing concern. BrightLayer AI has no reply after proposal for 12 days. Northstar Ops completed demo but is waiting for review. Founder follow-up is slipping and proposal-stage deals need attention this week.";
 
-async function expectTextOrder(page: Page, firstText: string, secondText: string) {
+async function expectSectionOrder(page: Page, firstTestId: string, secondTestId: string) {
   const order = await page.evaluate(
-    ({ firstText, secondText }) => {
-      const text = document.body.innerText;
-      return text.indexOf(firstText) !== -1 && text.indexOf(secondText) !== -1 && text.indexOf(firstText) < text.indexOf(secondText);
+    ({ firstTestId, secondTestId }) => {
+      const first = document.querySelector(`[data-testid="${firstTestId}"]`);
+      const second = document.querySelector(`[data-testid="${secondTestId}"]`);
+
+      if (!first || !second) {
+        return false;
+      }
+
+      return Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
     },
-    { firstText, secondText }
+    { firstTestId, secondTestId }
   );
 
   expect(order).toBe(true);
@@ -27,6 +33,16 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByText("Paste the relevant Notion notes, decisions, or project context.")).toBeVisible();
   await expect(page.getByText("Manual import only. ThoroughLoop does not connect to external tools yet.")).toBeVisible();
   await expect(page.getByText("Public demo note: use fictional or sanitized context. Avoid confidential production data.")).toBeVisible();
+  await page.getByLabel("Where is this context coming from?").selectOption("meeting_notes");
+  await expect(
+    page.getByText(
+      "Paste meeting minutes, call notes, or transcript-style notes. ThoroughLoop will look for actions, decisions, blockers, owners, and follow-up points."
+    )
+  ).toBeVisible();
+  await expect(page.getByTestId("messy-context-input")).toHaveAttribute(
+    "placeholder",
+    "Paste meeting minutes, call notes, decisions, blockers, owners, open questions, follow-ups, or next-review points."
+  );
   await page.getByTestId("context-source-select").selectOption("slack");
   await expect(page.getByText("Paste the relevant Slack messages or thread summary.")).toBeVisible();
   await page.getByTestId("messy-context-input").fill(messyFounderContext);
@@ -40,9 +56,9 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByTestId("primary-action-review")).toBeVisible();
   await expect(page.getByTestId("short-diagnosis")).toBeVisible();
   await expect(page.getByTestId("supporting-context")).toBeVisible();
-  await expectTextOrder(page, "This week's action", "Supporting context");
-  await expectTextOrder(page, "Decision to review next week", "Supporting context");
-  await expectTextOrder(page, "Short diagnosis", "Supporting context");
+  await expectSectionOrder(page, "primary-action-review", "short-diagnosis");
+  await expectSectionOrder(page, "primary-action-review", "supporting-context");
+  await expectSectionOrder(page, "short-diagnosis", "supporting-context");
 
   await page.locator("[data-testid='supporting-context'] summary").click();
   await expect(page.getByText("Why this is the bottleneck")).toBeVisible();

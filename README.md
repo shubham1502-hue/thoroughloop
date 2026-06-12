@@ -24,7 +24,7 @@ Landing page introducing the founder workflow, local-first boundary, and main ca
 
 ### 2. Choose a founder operating mess
 
-Sample cards show common founder situations such as stalled pipeline, onboarding handoff, hiring confusion, product feedback overload, and investor update chaos.
+Sample cards show common founder situations such as stalled pipeline, team meeting minutes, hiring confusion, product feedback overload, and investor update chaos.
 
 ![Sample cards showing common founder operating messes.](docs/assets/screenshots/02-sample-context-options.png)
 
@@ -122,7 +122,7 @@ After ThoroughLoop:
 5. It saves one decision.
 6. The decision can be reviewed later.
 
-Users can label where pasted context came from, such as Slack, Notion, CRM notes, meeting notes, customer feedback, or requirements handoffs. ThoroughLoop does not read from or update external tools yet.
+Users can label where pasted context came from, such as Slack, Notion, CRM notes, meeting minutes or call notes, customer feedback, or requirements handoffs. ThoroughLoop does not read from or update external tools yet.
 
 A Notion source label means manually pasted Notion context. It is not Notion import or sync.
 

@@ -82,7 +82,7 @@ async function main() {
     await scrollToLocator(page, page.getByText("Why this is the bottleneck"));
     await capture(page, "06-founder-memo-evidence.png");
 
-    await scrollToLocator(page, page.getByText("This week's action"));
+    await scrollToLocator(page, page.getByTestId("primary-action-review"));
     await capture(page, "07-founder-action-decision.png");
 
     await page.getByRole("button", { name: "Save loop" }).click();
