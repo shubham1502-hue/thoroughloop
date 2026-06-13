@@ -69,14 +69,29 @@ function actionForWorkflow(workflow: WorkflowName, subject: string): string {
 }
 
 function evidenceFromDiagnosis(diagnosis: FounderDiagnosis): string {
-  const companies = diagnosis.extractedCompaniesOrDeals.length
-    ? diagnosis.extractedCompaniesOrDeals.join(", ")
-    : "None detected";
-  const keywords = diagnosis.matchedKeywords.length ? diagnosis.matchedKeywords.join(", ") : "No strong keyword cluster";
-  const signals = diagnosis.extractedRiskSignals.join("; ");
+  const riskSignals = diagnosis.extractedRiskSignals.filter((signal) => !signal.toLowerCase().includes("too thin"));
   const source = contextSourceLabelForId(diagnosis.contextSource);
+  const evidence: string[] = [];
 
-  return `Source: ${source}. Workflow evidence: ${diagnosis.workflow.name}. Matched keywords: ${keywords}. Extracted companies or deal names: ${companies}. Risk signals: ${signals}.`;
+  if (riskSignals.length) {
+    evidence.push(`Risk signals: ${riskSignals.join("; ")}.`);
+  }
+
+  if (diagnosis.extractedCompaniesOrDeals.length) {
+    evidence.push(`Named context: ${diagnosis.extractedCompaniesOrDeals.join(", ")}.`);
+  }
+
+  if (diagnosis.matchedKeywords.length) {
+    evidence.push(`Operating signals: ${diagnosis.matchedKeywords.slice(0, 6).join(", ")}.`);
+  }
+
+  if (!evidence.length) {
+    evidence.push("The notes were too thin to produce strong operating evidence.");
+  }
+
+  evidence.push(`Source label: ${source}.`);
+
+  return evidence.join("\n");
 }
 
 function assumptionsFromMissingContext(diagnosis: FounderDiagnosis): MemoAssumption[] {
@@ -168,11 +183,11 @@ export function formatMemoForCopy(memo: SavedMemo): string {
     memo.title,
     "",
     `Source\n${contextSourceLabelForId(memo.contextSource)}`,
-    `Problem\n${memo.problem}`,
-    `Evidence\n${memo.evidence}`,
-    `Diagnosis\n${memo.diagnosis}`,
-    `Recommended decision\n${memo.recommendedDecision}`,
     `Founder action\n${memo.founderAction}`,
+    `Recommended decision\n${memo.recommendedDecision}`,
+    `Problem\n${memo.problem}`,
+    `Diagnosis\n${memo.diagnosis}`,
+    `Evidence\n${memo.evidence}`,
     `Owner\n${memo.owner}`,
     `Due date\n${memo.dueDate}`,
     `Metric to watch\n${memo.metricToWatch}`,

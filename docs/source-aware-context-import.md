@@ -19,11 +19,15 @@ This is not a live integration layer.
 ThoroughLoop does not currently:
 
 - Read from Slack, Notion, CRM systems, Gmail, Linear, Jira, or external tools.
+- Import from Notion.
+- Sync with Notion.
 - Pull messages, pages, notes, tickets, or records automatically.
 - Request OAuth access.
 - Store external access tokens.
 - Run background ingestion.
 - Store saved loops in a production database.
+
+A Notion source label means the user manually pasted Notion notes into the compose field. Optional Notion export, if configured separately, is outbound export only. It is not Notion import, Notion sync, or app persistence.
 
 ## Supported Source Labels
 
@@ -32,7 +36,7 @@ ThoroughLoop does not currently:
 - Notion page or workspace notes
 - CRM or sales pipeline notes
 - Customer feedback
-- Meeting notes
+- Meeting minutes or call notes
 - Product requirements or handoff notes
 - Hiring follow-up notes
 - Other
@@ -49,11 +53,15 @@ Example:
 
 The selected label is stored as loop metadata when the user saves the loop.
 
+Meeting minutes or call notes are supported as manually pasted context. The user can paste minutes, call notes, decisions, blockers, owners, open questions, and follow-up points. This is not file upload, meeting recording import, calendar import, or meeting-tool sync.
+
 ## Privacy Boundary
 
 Source labels are stored locally with saved memos, founder actions, and decisions through the existing browser storage flow.
 
 Pasted context remains part of the current local-first browser workflow unless a user explicitly uses an API, webhook, or optional export route. Source labels do not create external access or external storage.
+
+The public demo is intended for fictional or sanitized context. Users should avoid pasting confidential production data.
 
 ## Future Integration Candidates
 

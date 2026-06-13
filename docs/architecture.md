@@ -72,6 +72,8 @@ The main browser loop lets a user manually label where pasted context came from 
 
 This source label is metadata on the diagnosis, memo, founder action, and decision records. It does not change the local-first storage boundary, and it does not create provider ingestion, OAuth, background sync, or automatic extraction from external tools.
 
+A Notion source label means manually pasted Notion context. Optional Notion export sends a generated memo out to a configured Notion database, but ThoroughLoop does not import from Notion, sync with Notion, or use Notion as the saved-loop persistence layer.
+
 Saved loops created before this field existed remain valid because `contextSource` is optional on saved records. Rendering code falls back to General founder notes when the field is absent.
 
 ## Why No Production Persistence Yet

@@ -24,7 +24,7 @@ Landing page introducing the founder workflow, local-first boundary, and main ca
 
 ### 2. Choose a founder operating mess
 
-Sample cards show common founder situations such as stalled pipeline, onboarding handoff, hiring confusion, product feedback overload, and investor update chaos.
+Sample cards show common founder situations such as stalled pipeline, team meeting minutes, hiring confusion, product feedback overload, and investor update chaos.
 
 ![Sample cards showing common founder operating messes.](docs/assets/screenshots/02-sample-context-options.png)
 
@@ -40,23 +40,23 @@ ThoroughLoop separates signal, evidence, missing context, action, and review dec
 
 ![Thinking state separating signal, evidence, missing context, action, and review decision.](docs/assets/screenshots/04-thinking-state.png)
 
-### 5. Review the diagnosis
+### 5. Review the action and decision
 
-The result starts with one bottleneck diagnosis and a short TL;DR.
+The result now leads with one founder action for this week and one decision to review next week.
 
-![Generated diagnosis and TL;DR from the fictional sample context.](docs/assets/screenshots/05-generated-diagnosis.png)
+![Generated result prioritizing founder action and review decision.](docs/assets/screenshots/05-generated-diagnosis.png)
 
-### 6. Inspect the memo evidence
+### 6. Inspect the supporting context
 
-The memo explains why this is the bottleneck, what evidence came from the context, and what context is still missing.
+Supporting diagnosis details remain available below the action and review decision.
 
-![Memo evidence, bottleneck reasoning, and missing context.](docs/assets/screenshots/06-founder-memo-evidence.png)
+![Supporting context with bottleneck reasoning, evidence from notes, and missing context.](docs/assets/screenshots/06-founder-memo-evidence.png)
 
-### 7. Turn the memo into action and decision
+### 7. Review the focused execution cards
 
-The app converts messy context into one founder action for this week and one decision to review next week.
+The action and review decision stay visible as the main operating output.
 
-![Founder action this week and decision to review next week.](docs/assets/screenshots/07-founder-action-decision.png)
+![This week's action and decision to review next week.](docs/assets/screenshots/07-founder-action-decision.png)
 
 ### 8. Save the loop for review
 
@@ -72,12 +72,28 @@ Early-stage founders often have the context they need, but it is split across ca
 
 ThoroughLoop is designed to close the loop from messy context to action and review. It is not trying to become another PM system, CRM, dashboard, or Notion workspace.
 
+## Why Not Just Use ChatGPT?
+
+ChatGPT can summarize messy context. ThoroughLoop is designed to turn messy context into a repeatable operating loop: source, diagnosis, evidence, action, decision, and review.
+
+The current product is intentionally narrower than a general chat tool. It is built for founder/operator moments where the problem is not generating more text, but deciding what the operating bottleneck is and what should be reviewed later.
+
 ## Who This Is For
 
 - Early-stage founders with scattered sales, product, customer, hiring, or investor context.
 - Founder's Office and BizOps operators supporting founder-led teams.
 - Operators trying to convert messy updates into decisions and follow-ups.
 - Teams before they have mature RevOps, BizOps, or operating cadence.
+
+## When To Use ThoroughLoop
+
+- A sales pipeline feels stuck but the reason is unclear.
+- Customer feedback is noisy and scattered.
+- Product requirements keep shifting before handoff.
+- Hiring follow-ups are drifting.
+- Investor update context is scattered across notes and metrics.
+- Weekly priorities feel unclear.
+- A founder needs one action and one decision to revisit later.
 
 ## Before And After
 
@@ -106,7 +122,9 @@ After ThoroughLoop:
 5. It saves one decision.
 6. The decision can be reviewed later.
 
-Users can label where pasted context came from, such as Slack, Notion, CRM notes, meeting notes, customer feedback, or requirements handoffs. ThoroughLoop does not read from or update external tools yet.
+Users can label where pasted context came from, such as Slack, Notion, CRM notes, meeting minutes or call notes, customer feedback, or requirements handoffs. ThoroughLoop does not read from or update external tools yet.
+
+A Notion source label means manually pasted Notion context. It is not Notion import or sync.
 
 The current diagnosis and memo behavior is deterministic product logic in `packages/core`. It does not call an AI provider or external model.
 
@@ -142,7 +160,7 @@ See [examples/](examples/) for realistic fictional sample inputs and outputs.
 
 ## Try The Demo
 
-No login is required. Demo data is stored locally in the browser.
+No login is required. Demo data is stored locally in the browser. Use fictional or sanitized context, not confidential production data.
 
 1. Open the [live demo](https://thoroughloop.vercel.app).
 2. Paste messy founder context or choose a sample.
@@ -171,9 +189,9 @@ For a slightly longer manual path, see [docs/demo-walkthrough.md](docs/demo-walk
 - Workflow-specific loops on `/workflows`.
 - Local founder context defaults on `/settings`.
 - Public-safe intake and webhook examples in [docs/demo/api-and-webhook-demo.md](docs/demo/api-and-webhook-demo.md).
-- Optional Notion export setup in [docs/notion-export.md](docs/notion-export.md), which requires explicit environment configuration and is not the app's persistence layer.
+- Optional Notion export setup in [docs/notion-export.md](docs/notion-export.md), which requires explicit environment configuration, sends generated memos out to Notion, and is not import, sync, or the app's persistence layer.
 
-## Founder Validation Resources
+## For Validation And Portfolio Review
 
 These docs support early feedback conversations. They do not claim validation has happened.
 
@@ -184,16 +202,13 @@ These docs support early feedback conversations. They do not claim validation ha
 - [Founder learning journal](docs/founder-learning-journal.md).
 - [Demo script](docs/demo-script.md).
 - [Outreach message bank](docs/founder-outreach-message-bank.md).
-
-Supporting materials: [founder-facing audit](docs/founder-facing-audit.md) and [example founder loops](examples/).
-
-## Validation Evidence Resources
-
 - [Founder evidence repository](docs/founder-evidence-repository.md).
 - [Founder signal tracker](docs/founder-signal-tracker.md).
 - [Founder objection library](docs/founder-objection-library.md).
 - [Founder language bank](docs/founder-language-bank.md).
 - [Founder validation retrospective template](docs/founder-validation-retrospective-template.md).
+
+Supporting materials: [founder-facing audit](docs/founder-facing-audit.md) and [example founder loops](examples/).
 
 ## What This Project Demonstrates
 
