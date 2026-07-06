@@ -3,6 +3,7 @@ export * from "./date";
 export * from "./diagnosis";
 export * from "./integrations";
 export * from "./memo";
+export * from "./retention";
 export * from "./settings";
 export * from "./storage";
 export * from "./types";

@@ -12,13 +12,18 @@ import {
   contextSourceForId,
   contextSourceLabelForId,
   createDiagnosis,
+  buildReviewCalendarIcs,
   formatDisplayDate,
+  formatLoopTextBackup,
   formatMemoForCopy,
+  formatReviewReminder,
   generateFounderMemo,
   memoToDecision,
   memoToFounderAction,
   readCollection,
   readJson,
+  reviewDateForMemo,
+  safeFileDate,
   type ContextSourceId,
   type FounderDiagnosis,
   type SavedMemo,
@@ -126,6 +131,19 @@ const samples: SampleLoop[] = [
 ];
 
 const sampleById = new Map(samples.map((sample) => [sample.id, sample]));
+
+function downloadClientFile(filename: string, contents: string, type: string) {
+  const blob = new Blob([contents], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
 
 function formatReviewDate(value: string): string {
   if (!value) {
@@ -562,11 +580,13 @@ function ExampleLoopCard() {
 function HistorySection({
   memos,
   onCopyMemo,
+  onDownloadLoop,
   copiedId,
   historyRef
 }: {
   memos: SavedMemo[];
   onCopyMemo: (memo: SavedMemo) => void;
+  onDownloadLoop: (memo: SavedMemo) => void;
   copiedId: string;
   historyRef: RefObject<HTMLElement>;
 }) {
@@ -602,12 +622,20 @@ function HistorySection({
                     </div>
                     <h3 className="mt-3 text-lg font-semibold text-white sm:text-xl">{memo.title}</h3>
                   </div>
-                  <ButtonBase
-                    onClick={() => onCopyMemo(memo)}
-                    className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
-                  >
-                    {copiedId === memo.id ? "Copied" : "Copy memo"}
-                  </ButtonBase>
+                  <div className="grid gap-2 sm:min-w-[160px]">
+                    <ButtonBase
+                      onClick={() => onCopyMemo(memo)}
+                      className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
+                    >
+                      {copiedId === memo.id ? "Copied" : "Copy memo"}
+                    </ButtonBase>
+                    <ButtonBase
+                      onClick={() => onDownloadLoop(memo)}
+                      className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
+                    >
+                      Download loop
+                    </ButtonBase>
+                  </div>
                 </div>
                 <div className="mt-4 grid gap-3 text-sm leading-6 text-slate-400 md:grid-cols-2">
                   <p>
@@ -885,10 +913,16 @@ function Result({
   selectedSampleId,
   copied,
   saved,
+  savedReviewDate,
+  retentionMessage,
+  retentionError,
   notionState,
   onStartNew,
   onCopyMemo,
   onSaveLoop,
+  onDownloadCalendar,
+  onCopyReviewReminder,
+  onDownloadLoopText,
   onExportToNotion
 }: {
   diagnosis: FounderDiagnosis;
@@ -896,14 +930,20 @@ function Result({
   selectedSampleId: string | null;
   copied: boolean;
   saved: boolean;
+  savedReviewDate: string;
+  retentionMessage: string;
+  retentionError: string;
   notionState: NotionExportState;
   onStartNew: () => void;
   onCopyMemo: () => void;
   onSaveLoop: () => void;
+  onDownloadCalendar: () => void;
+  onCopyReviewReminder: () => void;
+  onDownloadLoopText: () => void;
   onExportToNotion: () => void;
 }) {
   const copy = useMemo(() => resultCopyForWorkflow(diagnosis, selectedSampleId), [diagnosis, selectedSampleId]);
-  const reviewDate = memoToDecision(memo).reviewDate;
+  const reviewDate = reviewDateForMemo(memo, { decisionReviewDate: savedReviewDate });
   const sourceLabel = contextSourceLabelForId(memo.contextSource ?? diagnosis.contextSource);
 
   return (
@@ -940,6 +980,53 @@ function Result({
         <p>{copy.investorSummary}</p>
       </Section>
 
+      {saved ? (
+        <section
+          aria-live="polite"
+          className="grid gap-4 rounded-lg border border-[#d9a441]/30 bg-[#181b16] p-4 shadow-dark-soft sm:p-5"
+        >
+          <div className="grid gap-2">
+            <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
+              Review kit
+            </p>
+            <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">
+              Saved. Review this next week.
+            </h2>
+            <p className="max-w-2xl text-sm leading-6 text-slate-300">
+              Keep the no-account loop alive with a calendar file, copyable reminder, or text backup.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <ButtonBase
+              onClick={onDownloadCalendar}
+              className="border border-[#d9a441]/35 bg-[#d9a441]/10 text-[#f0c76c] hover:border-[#d9a441]/60 hover:bg-[#d9a441]/15"
+            >
+              Add review to calendar
+            </ButtonBase>
+            <ButtonBase
+              onClick={onCopyReviewReminder}
+              className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
+            >
+              Copy review reminder
+            </ButtonBase>
+            <ButtonBase
+              onClick={onDownloadLoopText}
+              className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
+            >
+              Download loop as text
+            </ButtonBase>
+            <Link
+              href="/decision-log"
+              className="inline-flex min-h-[42px] items-center justify-center rounded-md border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-[#d9a441]/40 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#d9a441]/30"
+            >
+              Open decision log
+            </Link>
+          </div>
+          {retentionMessage ? <p className="text-sm font-semibold text-[#f0c76c]">{retentionMessage}</p> : null}
+          {retentionError ? <p className="text-sm font-semibold text-red-400">{retentionError}</p> : null}
+        </section>
+      ) : null}
+
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#071016]/95 px-4 py-3 backdrop-blur lg:sticky lg:bottom-4 lg:rounded-lg lg:border lg:bg-[#101820]/95">
         <div className="mx-auto grid max-w-4xl grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <ButtonBase
@@ -959,7 +1046,7 @@ function Result({
             disabled={saved}
             className="bg-[#d9a441] text-[#071016] hover:bg-[#f0c76c]"
           >
-            {saved ? "Loop saved" : "Save loop"}
+            {saved ? "Action and decision saved" : "Save action and review decision"}
           </ButtonBase>
           <ButtonBase
             data-testid="export-to-notion"
@@ -968,12 +1055,15 @@ function Result({
             className="border border-white/15 bg-white/5 text-white hover:border-[#d9a441]/40 hover:bg-white/10"
           >
             {notionState.kind === "loading"
-              ? "Exporting…"
+              ? "Exporting..."
               : notionState.kind === "success"
-                ? "Exported ✓"
-                : "Export to Notion"}
+                ? "Exported"
+                : "Optional Notion export"}
           </ButtonBase>
         </div>
+        <p className="mx-auto mt-2 max-w-4xl text-xs leading-5 text-slate-500">
+          Outbound export only. Notion is not used for import, sync, or persistence.
+        </p>
         {notionState.kind === "success" ? (
           <p className="mx-auto mt-2 max-w-4xl text-xs text-[#f0c76c]">
             Exported to Notion.{" "}
@@ -1002,6 +1092,9 @@ export function HomeLoop() {
   const [copiedMemo, setCopiedMemo] = useState(false);
   const [copiedHistoryMemoId, setCopiedHistoryMemoId] = useState("");
   const [savedCurrentLoop, setSavedCurrentLoop] = useState(false);
+  const [savedReviewDate, setSavedReviewDate] = useState("");
+  const [retentionMessage, setRetentionMessage] = useState("");
+  const [retentionError, setRetentionError] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const sampleSectionRef = useRef<HTMLElement>(null);
   const historySectionRef = useRef<HTMLElement>(null);
@@ -1040,6 +1133,9 @@ export function HomeLoop() {
       setMemo(nextMemo);
       setCopiedMemo(false);
       setSavedCurrentLoop(false);
+      setSavedReviewDate("");
+      setRetentionMessage("");
+      setRetentionError("");
       setStage("result");
     }, THINKING_DELAY_MS);
 
@@ -1050,6 +1146,8 @@ export function HomeLoop() {
     setRawInput("");
     setSelectedSampleId(null);
     setSelectedSourceId(DEFAULT_CONTEXT_SOURCE_ID);
+    setRetentionMessage("");
+    setRetentionError("");
     setStage("compose");
   }
 
@@ -1057,6 +1155,8 @@ export function HomeLoop() {
     setSelectedSampleId(sample.id);
     setSelectedSourceId(sample.sourceId);
     setRawInput(sample.context);
+    setRetentionMessage("");
+    setRetentionError("");
     setStage("compose");
   }
 
@@ -1089,16 +1189,73 @@ export function HomeLoop() {
     setCopiedHistoryMemoId(item.id);
   }
 
+  function downloadReviewCalendarForMemo(item: SavedMemo, decisionReviewDate = "") {
+    const reviewDate = reviewDateForMemo(item, { decisionReviewDate });
+    const filename = `thoroughloop-review-${safeFileDate(reviewDate)}.ics`;
+
+    downloadClientFile(filename, buildReviewCalendarIcs(item, { decisionReviewDate }), "text/calendar;charset=utf-8");
+    setRetentionMessage("Review calendar downloaded");
+    setRetentionError("");
+  }
+
+  function downloadLoopTextForMemo(item: SavedMemo, decisionReviewDate = "") {
+    const reviewDate = reviewDateForMemo(item, { decisionReviewDate });
+    const filename = `thoroughloop-loop-${safeFileDate(reviewDate)}.txt`;
+
+    downloadClientFile(filename, formatLoopTextBackup(item, { decisionReviewDate }), "text/plain;charset=utf-8");
+    setRetentionMessage("Loop text downloaded");
+    setRetentionError("");
+  }
+
+  function downloadHistoryLoopText(item: SavedMemo) {
+    downloadLoopTextForMemo(item, reviewDateFromCreatedAt(item.createdAt));
+  }
+
   async function saveLoop() {
     if (!memo) {
       return;
     }
 
+    const decision = memoToDecision(memo);
     const nextMemos = await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.memos, memo);
     await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.actions, memoToFounderAction(memo));
-    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.decisions, memoToDecision(memo));
+    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.decisions, decision);
     setSavedMemos(nextMemos);
+    setSavedReviewDate(decision.reviewDate);
     setSavedCurrentLoop(true);
+    setRetentionMessage("");
+    setRetentionError("");
+  }
+
+  function downloadCurrentReviewCalendar() {
+    if (!memo) {
+      return;
+    }
+
+    downloadReviewCalendarForMemo(memo, savedReviewDate);
+  }
+
+  async function copyCurrentReviewReminder() {
+    if (!memo) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(formatReviewReminder(memo, { decisionReviewDate: savedReviewDate }));
+      setRetentionMessage("Review reminder copied");
+      setRetentionError("");
+    } catch {
+      setRetentionMessage("");
+      setRetentionError("Could not copy reminder. You can still download the loop as text.");
+    }
+  }
+
+  function downloadCurrentLoopText() {
+    if (!memo) {
+      return;
+    }
+
+    downloadLoopTextForMemo(memo, savedReviewDate);
   }
 
   async function exportCurrentMemoToNotion() {
@@ -1117,6 +1274,9 @@ export function HomeLoop() {
     setMemo(null);
     setCopiedMemo(false);
     setSavedCurrentLoop(false);
+    setSavedReviewDate("");
+    setRetentionMessage("");
+    setRetentionError("");
     resetNotion();
     setStage("landing");
     window.requestAnimationFrame(() => {
@@ -1151,10 +1311,16 @@ export function HomeLoop() {
         selectedSampleId={selectedSampleId}
         copied={copiedMemo}
         saved={savedCurrentLoop}
+        savedReviewDate={savedReviewDate}
+        retentionMessage={retentionMessage}
+        retentionError={retentionError}
         notionState={notionStatus}
         onStartNew={startNewLoop}
         onCopyMemo={copyCurrentMemo}
         onSaveLoop={saveLoop}
+        onDownloadCalendar={downloadCurrentReviewCalendar}
+        onCopyReviewReminder={copyCurrentReviewReminder}
+        onDownloadLoopText={downloadCurrentLoopText}
         onExportToNotion={exportCurrentMemoToNotion}
       />
     );
@@ -1172,6 +1338,7 @@ export function HomeLoop() {
         <HistorySection
           memos={savedMemos}
           onCopyMemo={copyHistoryMemo}
+          onDownloadLoop={downloadHistoryLoopText}
           copiedId={copiedHistoryMemoId}
           historyRef={historySectionRef}
         />
