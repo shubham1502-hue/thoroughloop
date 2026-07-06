@@ -26,9 +26,9 @@ export function Shell({ children }: { children: ReactNode }) {
       <footer className="border-t border-white/10 bg-night px-4 py-6 text-sm text-slate-500 sm:px-5">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-center md:flex-row">
           <p>ThoroughLoop · runs locally in this browser</p>
-          <nav aria-label="Demo surfaces" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+          <nav aria-label="Explore ThoroughLoop" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
             <span className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-600">
-              Demo surfaces
+              Explore ThoroughLoop
             </span>
             {demoSurfaceLinks.map((link) => (
               <Link
