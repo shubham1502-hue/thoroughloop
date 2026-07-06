@@ -51,7 +51,7 @@ async function main() {
     await page.evaluate(() => window.scrollTo(0, 0));
     await capture(page, "01-landing-page.png");
 
-    await scrollToLocator(page, page.locator("#samples"));
+    await scrollToLocator(page, page.getByTestId("workflow-routing-section"));
     await capture(page, "02-sample-context-options.png");
 
     await page.getByRole("button", { name: /Stalled pipeline/i }).click();

@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ButtonHTMLAttributes, type ReactNode, type RefObject } from "react";
 import {
   DEFAULT_SETTINGS,
   DEFAULT_CONTEXT_SOURCE_ID,
   CONTEXT_SOURCE_OPTIONS,
   STORAGE_KEYS,
+  WORKFLOWS,
   appendCollectionItem,
   contextSourceForId,
   contextSourceLabelForId,
@@ -449,6 +451,51 @@ function InOutWhereStrip() {
   );
 }
 
+function WorkflowRoutingGrid() {
+  return (
+    <section className="grid gap-4" data-testid="workflow-routing-section">
+      <div className="grid gap-2">
+        <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
+          Workflow paths
+        </p>
+        <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">
+          Choose the operating loop first.
+        </h2>
+        <p className="max-w-2xl text-sm leading-6 text-slate-400">
+          Pick the workflow closest to the mess you are trying to close. You can still paste anything manually.
+        </p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {WORKFLOWS.map((workflow) => (
+          <article
+            key={workflow.id}
+            className="flex min-h-[280px] flex-col gap-4 rounded-lg border border-white/10 bg-[#101820] p-4 shadow-dark-soft transition hover:border-[#d9a441]/35 hover:bg-[#14232e]"
+          >
+            <div className="grid gap-2">
+              <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#d9a441]">
+                {workflow.estimatedTime}
+              </p>
+              <h3 className="text-lg font-semibold leading-6 text-white">{workflow.name}</h3>
+              <p className="text-sm leading-6 text-slate-400">{workflow.problemItSolves}</p>
+            </div>
+            <div className="grid gap-1 text-sm leading-6">
+              <p className="font-semibold text-slate-200">Best input to paste</p>
+              <p className="text-slate-500">{workflow.bestInputToPaste}</p>
+            </div>
+            <Link
+              href={workflow.path}
+              aria-label={`Open ${workflow.name} workflow`}
+              className="mt-auto inline-flex w-full justify-center rounded-md border border-[#d9a441]/35 bg-[#d9a441]/10 px-3 py-2 text-sm font-semibold text-[#f0c76c] transition hover:border-[#d9a441]/60 hover:bg-[#d9a441]/15 focus:outline-none focus:ring-2 focus:ring-[#d9a441]/30"
+            >
+              Open workflow
+            </Link>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function SampleGrid({
   onUseSample
 }: {
@@ -458,10 +505,10 @@ function SampleGrid({
     <section className="grid gap-4" id="samples">
       <div className="grid gap-2">
         <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
-          Mess-forward samples
+          Sample operating messes
         </p>
-        <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">Start from real operating mess.</h2>
-        <p className="text-sm leading-6 text-slate-500">Fictional examples for demo use. Paste your own context to run the loop.</p>
+        <h2 className="font-serif text-2xl font-semibold text-white sm:text-3xl">Try a fictional loop first.</h2>
+        <p className="text-sm leading-6 text-slate-500">Use a fictional sample to see the loop before pasting your own context.</p>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {samples.map((sample) => (
@@ -1118,6 +1165,7 @@ export function HomeLoop() {
       <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-12 sm:gap-8 sm:px-5 sm:pb-16 lg:gap-10 lg:px-8">
         <LandingHero onCompose={openCompose} />
         <InOutWhereStrip />
+        <WorkflowRoutingGrid />
         <section ref={sampleSectionRef}>
           <SampleGrid onUseSample={useSample} />
         </section>

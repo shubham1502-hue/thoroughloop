@@ -22,11 +22,11 @@ Landing page introducing the founder workflow, local-first boundary, and main ca
 
 ![Landing page introducing the founder workflow, local-first boundary, and main call to action.](docs/assets/screenshots/01-landing-page.png)
 
-### 2. Choose a founder operating mess
+### 2. Choose the operating loop
 
-Sample cards show common founder situations such as stalled pipeline, team meeting minutes, hiring confusion, product feedback overload, and investor update chaos.
+Workflow cards surface Revenue Rescue, Weekly Operating Review, Investor Update, Onboarding Risk, and Hiring Bottleneck before the secondary sample cards.
 
-![Sample cards showing common founder operating messes.](docs/assets/screenshots/02-sample-context-options.png)
+![Workflow cards showing the main ThoroughLoop operating loops.](docs/assets/screenshots/02-sample-context-options.png)
 
 ### 3. Paste or load the messy context
 

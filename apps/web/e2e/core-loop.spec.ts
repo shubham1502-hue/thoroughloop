@@ -26,6 +26,27 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
 
+  await expect(page.getByRole("heading", { name: "Choose the operating loop first." })).toBeVisible();
+  for (const workflowName of [
+    "Revenue Rescue",
+    "Weekly Operating Review",
+    "Investor Update",
+    "Onboarding Risk",
+    "Hiring Bottleneck"
+  ]) {
+    await expect(page.getByRole("heading", { name: workflowName })).toBeVisible();
+  }
+  await expect(page.getByText("Best input to paste").first()).toBeVisible();
+  await expect(page.getByText("3 minutes")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open Revenue Rescue workflow" })).toHaveAttribute(
+    "href",
+    "/workflows/revenue-rescue"
+  );
+  await expect(page.getByText("Sample operating messes")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Stalled pipeline/ })).toBeVisible();
+  await expect(page.getByText("Demo surfaces")).toHaveCount(0);
+  await expect(page.getByText("Explore ThoroughLoop")).toBeVisible();
+
   await page.getByRole("button", { name: "Paste your context" }).click();
   await expect(page.getByText("More context gives a sharper diagnosis.")).toBeVisible();
   await expect(page.getByLabel("Where is this context coming from?")).toHaveValue("general_notes");
