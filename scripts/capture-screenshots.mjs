@@ -85,8 +85,8 @@ async function main() {
     await scrollToLocator(page, page.getByTestId("primary-action-review"));
     await capture(page, "07-founder-action-decision.png");
 
-    await page.getByRole("button", { name: "Save loop" }).click();
-    await page.getByRole("button", { name: "Loop saved" }).waitFor({ state: "visible" });
+    await page.getByRole("button", { name: "Save action and review decision" }).click();
+    await page.getByRole("button", { name: "Action and decision saved" }).waitFor({ state: "visible" });
     await page.getByRole("button", { name: "Start new loop" }).click();
     await page.getByRole("heading", { name: "Saved loops" }).waitFor({ state: "visible" });
     await scrollToLocator(page, page.locator("#saved-history"));

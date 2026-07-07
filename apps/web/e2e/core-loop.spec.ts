@@ -86,8 +86,26 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByText("Evidence from your notes")).toBeVisible();
   await expect(page.getByText("Missing context")).toBeVisible();
 
-  await page.getByRole("button", { name: "Save loop" }).click();
-  await expect(page.getByRole("button", { name: "Loop saved" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save action and review decision" })).toBeVisible();
+  await page.getByRole("button", { name: "Save action and review decision" }).click();
+  await expect(page.getByRole("button", { name: "Action and decision saved" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Saved. Review this next week." })).toBeVisible();
+  await expect(
+    page.getByText("Keep the no-account loop alive with a calendar file, copyable reminder, or text backup.")
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add review to calendar" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy review reminder" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download loop as text" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open decision log" })).toHaveAttribute("href", "/decision-log");
+  await expect(page.getByRole("button", { name: "Copy memo" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Optional Notion export" })).toBeVisible();
+  await expect(
+    page.getByText("Outbound export only. Notion is not used for import, sync, or persistence.")
+  ).toBeVisible();
+  await expect(page.locator('input[type="email"]')).toHaveCount(0);
+  await expect(page.getByText("Create account")).toHaveCount(0);
+  await expect(page.getByText("Sign in")).toHaveCount(0);
+  await expect(page.getByText("Log in")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Start new loop" }).click();
   await expect(page.getByRole("heading", { name: "Saved loops" })).toBeVisible();
