@@ -9,6 +9,7 @@ import {
   contextSourceLabelForId,
   extractCompanyOrDealNames,
   extractRiskSignals,
+  extractSourceSnippets,
   formatMemoForCopy,
   generateFounderMemo,
   memoToDecision,
@@ -210,6 +211,7 @@ describe("memo generation", () => {
     assert.match(memo.evidence, /Named context: FinCore Labs/);
     assert.match(memo.evidence, /Operating signals: .*proposal/);
     assert.match(memo.evidence, /Source label: General founder notes/);
+    assert.ok(memo.sourceSnippets?.length);
     assert.doesNotMatch(memo.evidence, /Matched keywords|Extracted companies|Workflow evidence/);
     assert.match(memo.founderAction, /founder-led follow-up/i);
     assert.match(memo.recommendedDecision, /Decide whether/i);
@@ -232,7 +234,9 @@ describe("memo generation", () => {
     assert.match(copy, /Problem\n/);
     assert.match(copy, /Diagnosis\n/);
     assert.match(copy, /Founder action\n/);
+    assert.match(copy, /Done when\n/);
     assert.match(copy, /Recommended decision\n/);
+    assert.match(copy, /Review date\n/);
     assert.match(copy, /Metric to watch\n/);
     assert.ok(sourceIndex < actionIndex);
     assert.ok(actionIndex < decisionIndex);
@@ -249,6 +253,62 @@ describe("memo generation", () => {
     assert.match(memo.evidence, /The notes were too thin to produce strong operating evidence/);
     assert.match(memo.evidence, /Source label: General founder notes/);
     assert.doesNotMatch(memo.evidence, /Matched keywords|Extracted companies|Workflow evidence/);
+  });
+});
+
+describe("source snippet extraction", () => {
+  it("returns source-backed snippets copied from raw input", () => {
+    const input =
+      "FinCore Labs is stuck in negotiation after proposal and pricing concern. BrightLayer AI has no reply after proposal for 12 days. Nobody owns the next founder follow-up.";
+    const diagnosis = createDiagnosis(input);
+    const snippets = extractSourceSnippets(diagnosis);
+
+    assert.ok(snippets.length >= 2);
+    assert.ok(snippets.length <= 4);
+    assert.ok(snippets.some((snippet) => snippet.reason === "Mentions pricing concern"));
+    assert.ok(snippets.some((snippet) => snippet.reason === "Mentions stale proposal follow-up"));
+
+    for (const snippet of snippets) {
+      assert.ok(input.includes(snippet.text));
+    }
+  });
+
+  it("uses a clear fallback when source context is too thin", () => {
+    const diagnosis = createDiagnosis("Need action.");
+    const snippets = extractSourceSnippets(diagnosis);
+
+    assert.deepEqual(snippets, [
+      {
+        id: "source_1",
+        text: "No strong source snippet found. Add more concrete notes before trusting this task.",
+        reason: "Needs more concrete source context"
+      }
+    ]);
+  });
+
+  it("does not fabricate snippets when the input has no matching source evidence", () => {
+    const input =
+      "The founder wrote a general reflection about energy, focus, and the need to think more carefully before the next discussion.";
+    const diagnosis = createDiagnosis(input);
+    const snippets = extractSourceSnippets(diagnosis);
+
+    assert.ok(snippets.every((snippet) => input.includes(snippet.text) || snippet.text.startsWith("No strong source snippet found")));
+  });
+
+  it("caps snippets to a reasonable count", () => {
+    const diagnosis = createDiagnosis(
+      [
+        "FinCore Labs is stuck after pricing.",
+        "BrightLayer AI has no reply after proposal.",
+        "Nobody owns the next step.",
+        "Onboarding is blocked for a trial user.",
+        "The decision needs review next Friday.",
+        "Hiring interviews are slipping."
+      ].join(" ")
+    );
+    const snippets = extractSourceSnippets(diagnosis);
+
+    assert.ok(snippets.length <= 4);
   });
 });
 

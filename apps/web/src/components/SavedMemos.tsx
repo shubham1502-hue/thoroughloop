@@ -36,6 +36,7 @@ export function SavedMemos() {
           memo.problem,
           memo.recommendedDecision,
           memo.founderAction,
+          memo.doneWhen ?? "",
           memo.investorSafeSummary,
           contextSourceLabelForId(memo.contextSource)
         ]
@@ -116,6 +117,14 @@ export function SavedMemos() {
                 <div>
                   <p className="text-sm font-semibold">Recommended decision</p>
                   <p className="mt-1 text-sm leading-6 text-muted">{memo.recommendedDecision}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Done when</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">{memo.doneWhen ?? "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Review date</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">{memo.reviewDate ? formatDisplayDate(memo.reviewDate) : "Not set"}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Problem</p>

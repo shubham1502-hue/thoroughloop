@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const messyFounderContext =
   "FinCore Labs has been stuck in negotiation for 21 days after a pricing concern. BrightLayer AI has no reply after proposal for 12 days. Northstar Ops completed demo but is waiting for review. Founder follow-up is slipping and proposal-stage deals need attention this week.";
@@ -23,6 +24,9 @@ async function expectSectionOrder(page: Page, firstTestId: string, secondTestId:
 
 test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await page.goto("/");
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+    origin: new URL(page.url()).origin
+  });
   await page.evaluate(() => window.localStorage.clear());
   await page.reload();
 
@@ -72,14 +76,35 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "The bottleneck is discovery quality, not pricing." })).toBeVisible();
   await expect(page.getByText("TL;DR: Discovery quality, not pricing.")).toBeVisible();
   await expect(page.getByText("Source · Slack thread or channel notes")).toBeVisible();
-  await expect(page.getByText("Sit in on the next two discovery calls")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Sit in on the next two discovery calls/ })).toBeVisible();
   await expect(page.getByText("Review ·")).toBeVisible();
   await expect(page.getByTestId("primary-action-review")).toBeVisible();
+  await expect(page.getByTestId("source-support")).toBeVisible();
+  await expect(page.getByText("These snippets are pulled from the pasted context.")).toBeVisible();
+  await expect(page.getByText("FinCore Labs has been stuck in negotiation")).toBeVisible();
+  await expect(page.getByTestId("tune-before-saving")).toBeVisible();
+  await expect(page.getByText("Deadline logic")).toBeVisible();
   await expect(page.getByTestId("short-diagnosis")).toBeVisible();
   await expect(page.getByTestId("supporting-context")).toBeVisible();
   await expectSectionOrder(page, "primary-action-review", "short-diagnosis");
   await expectSectionOrder(page, "primary-action-review", "supporting-context");
   await expectSectionOrder(page, "short-diagnosis", "supporting-context");
+
+  await page.getByTestId("editable-founder-action").fill("Call FinCore and BrightLayer today, assign one owner, and confirm the next decision step.");
+  await page.getByTestId("editable-done-when").fill("Both accounts have one owner, one next step, and one written follow-up note.");
+  await page.getByTestId("editable-review-decision").fill("Should we keep founder-led follow-up on these two accounts next week?");
+  await page.getByTestId("editable-review-date").fill("2026-07-21");
+  await page.getByTestId("editable-metric").fill("Two late-stage accounts with confirmed next steps.");
+  await expect(page.getByRole("heading", { name: /Call FinCore and BrightLayer today/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Should we keep founder-led follow-up on these two accounts next week/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "Copy memo" }).click();
+  const copiedMemo = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copiedMemo).toContain("Call FinCore and BrightLayer today");
+  expect(copiedMemo).toContain("Both accounts have one owner");
+  expect(copiedMemo).toContain("Should we keep founder-led follow-up on these two accounts next week?");
+  expect(copiedMemo).toContain("2026-07-21");
+  expect(copiedMemo).toContain("Two late-stage accounts with confirmed next steps.");
 
   await page.locator("[data-testid='supporting-context'] summary").click();
   await expect(page.getByText("Why this is the bottleneck")).toBeVisible();
@@ -97,7 +122,7 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Copy review reminder" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Download loop as text" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Open decision log" })).toHaveAttribute("href", "/decision-log");
-  await expect(page.getByRole("button", { name: "Copy memo" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Memo copied" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Optional Notion export" })).toBeVisible();
   await expect(
     page.getByText("Outbound export only. Notion is not used for import, sync, or persistence.")
@@ -107,15 +132,47 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByText("Sign in")).toHaveCount(0);
   await expect(page.getByText("Log in")).toHaveCount(0);
 
+  await page.getByRole("button", { name: "Copy review reminder" }).click();
+  const copiedReminder = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copiedReminder).toContain("Review ThoroughLoop decision on Jul 21, 2026");
+  expect(copiedReminder).toContain("Call FinCore and BrightLayer today");
+  expect(copiedReminder).toContain("Two late-stage accounts with confirmed next steps.");
+
+  const calendarDownloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Add review to calendar" }).click();
+  const calendarDownload = await calendarDownloadPromise;
+  expect(calendarDownload.suggestedFilename()).toContain("2026-07-21");
+  const calendarPath = await calendarDownload.path();
+  expect(calendarPath).toBeTruthy();
+  const calendarContents = await readFile(calendarPath ?? "", "utf8");
+  expect(calendarContents).toContain("DTSTART;VALUE=DATE:20260721");
+  expect(calendarContents).toContain("Call FinCore and BrightLayer today");
+
+  const textDownloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download loop as text" }).click();
+  const textDownload = await textDownloadPromise;
+  expect(textDownload.suggestedFilename()).toContain("2026-07-21");
+  const textPath = await textDownload.path();
+  expect(textPath).toBeTruthy();
+  const textContents = await readFile(textPath ?? "", "utf8");
+  expect(textContents).toContain("Call FinCore and BrightLayer today");
+  expect(textContents).toContain("Both accounts have one owner");
+  expect(textContents).toContain("Two late-stage accounts with confirmed next steps.");
+
   await page.getByRole("button", { name: "Start new loop" }).click();
   await expect(page.getByRole("heading", { name: "Saved loops" })).toBeVisible();
   await expect(page.getByText("Discovery quality, not pricing.").first()).toBeVisible();
   await expect(page.getByText("Source · Slack thread or channel notes")).toBeVisible();
+  await expect(page.getByText("Call FinCore and BrightLayer today")).toBeVisible();
+  await expect(page.getByText("Both accounts have one owner")).toBeVisible();
 
   await page.goto("/memos");
   await expect(page.getByRole("heading", { name: "Saved founder memos" })).toBeVisible();
   await expect(page.getByText("Discovery quality, not pricing.")).toBeVisible();
   await expect(page.getByText("Source: Slack thread or channel notes")).toBeVisible();
+  await expect(page.getByText("Call FinCore and BrightLayer today")).toBeVisible();
+  await expect(page.getByText("Both accounts have one owner")).toBeVisible();
+  await expect(page.getByText("Jul 21, 2026")).toBeVisible();
   const savedMemoOrder = await page.getByTestId("saved-memo-detail-grid").evaluate((grid) => {
     const text = grid.textContent ?? "";
     return (
@@ -133,15 +190,18 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
 
   await page.goto("/action-queue");
   await expect(page.getByRole("heading", { name: "One action per memo" })).toBeVisible();
-  await expect(page.getByText("Sit in on the next two discovery calls")).toBeVisible();
+  await expect(page.getByText("Call FinCore and BrightLayer today")).toBeVisible();
+  await expect(page.getByText("Both accounts have one owner")).toBeVisible();
   await expect(page.getByText("Source: Slack thread or channel notes")).toBeVisible();
 
   await page.goto("/decision-log");
   await expect(page.getByRole("heading", { name: "Decisions to review next week" })).toBeVisible();
-  await expect(page.getByText("Should FinCore Labs stay in founder-led discovery")).toBeVisible();
+  await expect(page.getByText("Should we keep founder-led follow-up on these two accounts next week?")).toBeVisible();
+  await expect(page.locator('input[type="date"]')).toHaveValue("2026-07-21");
+  await expect(page.locator('label:has-text("Metric to watch") input')).toHaveValue("Two late-stage accounts with confirmed next steps.");
   await expect(page.getByText("Source: Slack thread or channel notes")).toBeVisible();
 
   await page.goto("/workflows/weekly-review");
   await expect(page.getByRole("heading", { name: "Review previous decision" })).toBeVisible();
-  await expect(page.getByText("Should FinCore Labs stay in founder-led discovery")).toBeVisible();
+  await expect(page.getByText("Should we keep founder-led follow-up on these two accounts next week?")).toBeVisible();
 });

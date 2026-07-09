@@ -5,6 +5,7 @@ export * from "./integrations";
 export * from "./memo";
 export * from "./retention";
 export * from "./settings";
+export * from "./sourceSnippets";
 export * from "./storage";
 export * from "./types";
 export * from "./validation";

@@ -54,6 +54,12 @@ export interface MemoAssumption {
   whatToVerifyNext: string;
 }
 
+export interface SourceSnippet {
+  id: string;
+  text: string;
+  reason: string;
+}
+
 export interface SavedMemo {
   id: string;
   createdAt: string;
@@ -65,11 +71,14 @@ export interface SavedMemo {
   diagnosis: string;
   recommendedDecision: string;
   founderAction: string;
+  doneWhen?: string;
   owner: string;
   dueDate: string;
+  reviewDate?: string;
   metricToWatch: string;
   ignoreThisWeek: string;
   assumptionsMade: MemoAssumption[];
+  sourceSnippets?: SourceSnippet[];
   investorSafeSummary: string;
   rawInput: string;
 }
@@ -80,6 +89,7 @@ export interface SavedFounderAction {
   contextSource?: ContextSourceId;
   workflow: WorkflowName;
   founderAction: string;
+  doneWhen?: string;
   whyItMatters: string;
   sourceMemoId: string;
   owner: string;
