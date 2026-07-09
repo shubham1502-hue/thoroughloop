@@ -1,5 +1,6 @@
 import { contextSourceLabelForId } from "./contextSources";
 import { nextWeekIsoDate, nowIsoString, tomorrowIsoDate } from "./date";
+import { extractSourceSnippets } from "./sourceSnippets";
 import type {
   FounderDiagnosis,
   InvestorUpdateVersions,
@@ -113,6 +114,7 @@ export function generateFounderMemo(
   const evidence = evidenceFromDiagnosis(diagnosis);
   const founderAction = actionForWorkflow(workflow, subject);
   const recommendedDecision = decisionForWorkflow(workflow, subject);
+  const reviewDate = nextWeekIsoDate();
 
   return {
     id: createId("memo"),
@@ -127,9 +129,11 @@ export function generateFounderMemo(
     founderAction,
     owner,
     dueDate: tomorrowIsoDate(),
+    reviewDate,
     metricToWatch: diagnosis.workflow.defaultMetricToWatch,
     ignoreThisWeek: diagnosis.workflow.ignoreThisWeek,
     assumptionsMade: assumptionsFromMissingContext(diagnosis),
+    sourceSnippets: extractSourceSnippets(diagnosis),
     investorSafeSummary: `${workflow}: ${recommendedDecision} The next founder action is to ${founderAction.toLowerCase()}`,
     rawInput: diagnosis.rawInput
   };
@@ -142,6 +146,7 @@ export function memoToFounderAction(memo: SavedMemo): SavedFounderAction {
     contextSource: memo.contextSource,
     workflow: memo.workflow,
     founderAction: memo.founderAction,
+    ...(memo.doneWhen ? { doneWhen: memo.doneWhen } : {}),
     whyItMatters: memo.diagnosis,
     sourceMemoId: memo.id,
     owner: memo.owner,
@@ -165,7 +170,7 @@ export function memoToDecision(memo: SavedMemo): SavedDecision {
     actionAssigned: memo.founderAction,
     owner: memo.owner,
     metricToWatch: memo.metricToWatch,
-    reviewDate: nextWeekIsoDate(),
+    reviewDate: memo.reviewDate ?? nextWeekIsoDate(),
     outcomeNote: "",
     status: "Open"
   };
@@ -178,16 +183,22 @@ export function formatMemoForCopy(memo: SavedMemo): string {
         `Assumption: ${item.assumption}\nWhy it matters: ${item.whyItMatters}\nWhat to verify next: ${item.whatToVerifyNext}`
     )
     .join("\n\n");
+  const sourceSupport = memo.sourceSnippets?.length
+    ? memo.sourceSnippets.map((snippet) => `${snippet.reason}: ${snippet.text}`).join("\n")
+    : "No source snippets captured.";
 
   return [
     memo.title,
     "",
     `Source\n${contextSourceLabelForId(memo.contextSource)}`,
     `Founder action\n${memo.founderAction}`,
+    `Done when\n${memo.doneWhen ?? "Not provided"}`,
     `Recommended decision\n${memo.recommendedDecision}`,
+    `Review date\n${memo.reviewDate ?? "Not set"}`,
     `Problem\n${memo.problem}`,
     `Diagnosis\n${memo.diagnosis}`,
     `Evidence\n${memo.evidence}`,
+    `Source support\n${sourceSupport}`,
     `Owner\n${memo.owner}`,
     `Due date\n${memo.dueDate}`,
     `Metric to watch\n${memo.metricToWatch}`,

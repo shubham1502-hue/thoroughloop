@@ -19,8 +19,10 @@ const baseMemo: SavedMemo = {
   diagnosis: "The bottleneck is discovery quality, not pricing.",
   recommendedDecision: "Should Acme stay in founder-led discovery next week?",
   founderAction: "Sit in on the next two discovery calls.",
+  doneWhen: "Two call notes include buyer language and the next decision step.",
   owner: "Founder",
   dueDate: "2026-07-07",
+  reviewDate: "2026-07-14",
   metricToWatch: "Proposal-to-close conversion next 7 days.",
   ignoreThisWeek: "Do not optimize top-of-funnel volume yet.",
   assumptionsMade: [
@@ -31,6 +33,13 @@ const baseMemo: SavedMemo = {
     }
   ],
   investorSafeSummary: "Revenue risk is in late-stage follow-up quality.",
+  sourceSnippets: [
+    {
+      id: "source_1",
+      text: "Acme is qualified, pricing is unresolved, and no owner is assigned.",
+      reason: "Mentions pricing concern"
+    }
+  ],
   rawInput: "Acme is qualified, pricing is unresolved, and no owner is assigned.",
   contextSource: "crm_pipeline"
 };
@@ -51,9 +60,11 @@ describe("retention helpers", () => {
 
     assert.match(backup, /ThoroughLoop loop backup: Discovery quality, not pricing\./);
     assert.match(backup, /Founder action\nSit in on the next two discovery calls\./);
+    assert.match(backup, /Done when\nTwo call notes include buyer language and the next decision step\./);
     assert.match(backup, /Recommended decision\nShould Acme stay in founder-led discovery next week\?/);
     assert.match(backup, /Review date: Jul 13, 2026/);
     assert.match(backup, /Metric to watch\nProposal-to-close conversion next 7 days\./);
+    assert.match(backup, /Source support\n- Mentions pricing concern: Acme is qualified/);
     assert.match(backup, /Assumption: Deal value is not provided\./);
     assert.match(backup, /Raw input\nAcme is qualified, pricing is unresolved, and no owner is assigned\./);
   });
@@ -94,6 +105,22 @@ describe("retention helpers", () => {
     const reviewDate = reviewDateForMemo(baseMemo, { decisionReviewDate: "not-a-date" });
 
     assert.equal(reviewDate, "2026-07-13");
+  });
+
+  it("uses the edited memo review date when no override is provided", () => {
+    const reviewDate = reviewDateForMemo(baseMemo);
+
+    assert.equal(reviewDate, "2026-07-14");
+  });
+
+  it("includes edited task fields in calendar output", () => {
+    const ics = buildReviewCalendarIcs(baseMemo, {
+      dtstamp: new Date("2026-07-06T00:00:00.000Z"),
+      uid: "memo-retention-test"
+    });
+
+    assert.match(ics, /DTSTART;VALUE=DATE:20260714/);
+    assert.match(ics, /Done when: Two call notes include buyer language and the next decision step\./);
   });
 
   it("falls back safely when createdAt and review date are invalid", () => {

@@ -108,6 +108,11 @@ export function ActionQueue() {
                     </p>
                     <h2 className="mt-1 text-xl font-semibold sm:text-2xl">{action.founderAction}</h2>
                     <p className="mt-2 text-sm leading-6 text-muted">{action.whyItMatters}</p>
+                    {action.doneWhen ? (
+                      <p className="mt-2 text-sm leading-6 text-muted">
+                        <span className="font-semibold text-ink">Done when:</span> {action.doneWhen}
+                      </p>
+                    ) : null}
                   </div>
                   <button
                     type="button"
@@ -171,6 +176,14 @@ export function ActionQueue() {
                       className={inputClass}
                       value={action.metricToWatch}
                       onChange={(event) => updateDraft({ ...action, metricToWatch: event.target.value })}
+                    />
+                  </label>
+                  <label className="grid gap-2 md:col-span-3">
+                    <span className="text-sm font-semibold">Done when</span>
+                    <input
+                      className={inputClass}
+                      value={action.doneWhen ?? ""}
+                      onChange={(event) => updateDraft({ ...action, doneWhen: event.target.value })}
                     />
                   </label>
                   <label className="grid gap-2 md:col-span-3">

@@ -68,7 +68,7 @@ export function reviewDateForMemo(
   options: RetentionDateOptions = {},
 ): string {
   const decisionReviewDate =
-    options.decisionReviewDate ?? memoToDecision(memo).reviewDate;
+    options.decisionReviewDate?.trim() || memo.reviewDate || memoToDecision(memo).reviewDate;
 
   if (parseDateOnly(decisionReviewDate)) {
     return decisionReviewDate;
@@ -133,6 +133,9 @@ export function formatLoopTextBackup(
     "Founder action",
     normalizeLine(memo.founderAction),
     "",
+    "Done when",
+    normalizeLine(memo.doneWhen),
+    "",
     "Recommended decision",
     normalizeLine(memo.recommendedDecision),
     "",
@@ -144,6 +147,11 @@ export function formatLoopTextBackup(
     "",
     "Evidence",
     normalizeLine(memo.evidence),
+    "",
+    "Source support",
+    memo.sourceSnippets?.length
+      ? memo.sourceSnippets.map((snippet) => `- ${snippet.reason}: ${snippet.text}`).join("\n")
+      : "No source snippets captured.",
     "",
     "Assumptions made",
     assumptions,
@@ -166,6 +174,7 @@ export function buildReviewCalendarIcs(
   const description = [
     `Decision: ${normalizeLine(memo.recommendedDecision)}`,
     `Founder action: ${normalizeLine(memo.founderAction)}`,
+    `Done when: ${normalizeLine(memo.doneWhen)}`,
     `Metric to watch: ${normalizeLine(memo.metricToWatch)}`,
     `Source: ${sourceLabelForMemo(memo)}`,
     "Saved in local browser storage. Bring back the outcome before changing the loop.",

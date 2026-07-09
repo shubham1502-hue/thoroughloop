@@ -376,7 +376,26 @@ function memoForResult(diagnosis: FounderDiagnosis, memo: SavedMemo, selectedSam
     diagnosis: copy.diagnosis,
     recommendedDecision: copy.decision.question,
     founderAction: copy.action.command,
+    doneWhen: copy.action.doneWhen,
     investorSafeSummary: copy.investorSummary
+  };
+}
+
+function copyForMemo(copy: ResultCopy, memo: SavedMemo): ResultCopy {
+  return {
+    ...copy,
+    tldr: memo.title,
+    diagnosis: memo.diagnosis,
+    action: {
+      ...copy.action,
+      command: memo.founderAction,
+      doneWhen: memo.doneWhen ?? copy.action.doneWhen
+    },
+    decision: {
+      ...copy.decision,
+      question: memo.recommendedDecision
+    },
+    investorSummary: memo.investorSafeSummary
   };
 }
 
@@ -602,7 +621,7 @@ function HistorySection({
       {memos.length ? (
         <div className="grid gap-3">
           {memos.map((memo) => {
-            const reviewDate = reviewDateFromCreatedAt(memo.createdAt);
+            const reviewDate = reviewDateForMemo(memo, { decisionReviewDate: memo.reviewDate ?? reviewDateFromCreatedAt(memo.createdAt) });
             const sourceLabel = contextSourceLabelForId(memo.contextSource);
 
             return (
@@ -641,6 +660,11 @@ function HistorySection({
                   <p>
                     <span className="font-semibold text-slate-200">Founder action:</span> {memo.founderAction}
                   </p>
+                  {memo.doneWhen ? (
+                    <p>
+                      <span className="font-semibold text-slate-200">Done when:</span> {memo.doneWhen}
+                    </p>
+                  ) : null}
                   <p>
                     <span className="font-semibold text-slate-200">Decision:</span> {memo.recommendedDecision}
                   </p>
@@ -901,6 +925,125 @@ function SupportingContext({ copy }: { copy: ResultCopy }) {
   );
 }
 
+const taskInputClass =
+  "w-full rounded-md border border-white/10 bg-[#071016] px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-[#d9a441] focus:ring-2 focus:ring-[#d9a441]/20";
+
+function SourceSupport({ memo }: { memo: SavedMemo }) {
+  const snippets = memo.sourceSnippets ?? [];
+
+  return (
+    <section data-testid="source-support" className="rounded-lg border border-white/10 bg-[#101820] p-4 shadow-dark-soft sm:p-5">
+      <div className="grid gap-2">
+        <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
+          Source support
+        </p>
+        <p className="max-w-2xl text-sm leading-6 text-slate-400">
+          These snippets are pulled from the pasted context. They explain why this action was suggested.
+        </p>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {snippets.map((snippet) => (
+          <article key={snippet.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+            <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#f0c76c]">
+              {snippet.reason}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">&quot;{snippet.text}&quot;</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TuneBeforeSaving({
+  memo,
+  onUpdateMemo
+}: {
+  memo: SavedMemo;
+  onUpdateMemo: (patch: Partial<SavedMemo>) => void;
+}) {
+  return (
+    <section data-testid="tune-before-saving" className="rounded-lg border border-[#d9a441]/25 bg-[#181b16] p-4 shadow-dark-soft sm:p-5">
+      <div className="grid gap-2">
+        <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#d9a441]">
+          Tune before saving
+        </p>
+        <p className="max-w-2xl text-sm leading-6 text-slate-300">
+          Adjust the task, review decision, date, or metric before it is saved locally or exported.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-4">
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-white">Founder action</span>
+          <textarea
+            data-testid="editable-founder-action"
+            className={taskInputClass}
+            rows={2}
+            value={memo.founderAction}
+            onChange={(event) => onUpdateMemo({ founderAction: event.target.value })}
+          />
+        </label>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-white">Done when</span>
+          <textarea
+            data-testid="editable-done-when"
+            className={taskInputClass}
+            rows={2}
+            value={memo.doneWhen ?? ""}
+            onChange={(event) => onUpdateMemo({ doneWhen: event.target.value })}
+          />
+        </label>
+
+        <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold text-white">Review decision</span>
+            <textarea
+              data-testid="editable-review-decision"
+              className={taskInputClass}
+              rows={2}
+              value={memo.recommendedDecision}
+              onChange={(event) => onUpdateMemo({ recommendedDecision: event.target.value })}
+            />
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold text-white">Review date</span>
+            <input
+              data-testid="editable-review-date"
+              className={taskInputClass}
+              type="date"
+              value={memo.reviewDate ?? ""}
+              onChange={(event) => onUpdateMemo({ reviewDate: event.target.value })}
+            />
+          </label>
+        </div>
+
+        <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
+          <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#f0c76c]">
+            Deadline logic
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            ThoroughLoop uses the loop creation date as the default timing anchor. Edit the review date if these notes are older or already have a different deadline.
+          </p>
+        </div>
+
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-white">Metric to watch</span>
+          <textarea
+            data-testid="editable-metric"
+            className={taskInputClass}
+            rows={2}
+            value={memo.metricToWatch}
+            onChange={(event) => onUpdateMemo({ metricToWatch: event.target.value })}
+          />
+        </label>
+      </div>
+    </section>
+  );
+}
+
 type NotionExportState =
   | { kind: "idle" }
   | { kind: "loading" }
@@ -923,7 +1066,8 @@ function Result({
   onDownloadCalendar,
   onCopyReviewReminder,
   onDownloadLoopText,
-  onExportToNotion
+  onExportToNotion,
+  onUpdateMemo
 }: {
   diagnosis: FounderDiagnosis;
   memo: SavedMemo;
@@ -941,8 +1085,10 @@ function Result({
   onCopyReviewReminder: () => void;
   onDownloadLoopText: () => void;
   onExportToNotion: () => void;
+  onUpdateMemo: (patch: Partial<SavedMemo>) => void;
 }) {
-  const copy = useMemo(() => resultCopyForWorkflow(diagnosis, selectedSampleId), [diagnosis, selectedSampleId]);
+  const generatedCopy = useMemo(() => resultCopyForWorkflow(diagnosis, selectedSampleId), [diagnosis, selectedSampleId]);
+  const copy = useMemo(() => copyForMemo(generatedCopy, memo), [generatedCopy, memo]);
   const reviewDate = reviewDateForMemo(memo, { decisionReviewDate: savedReviewDate });
   const sourceLabel = contextSourceLabelForId(memo.contextSource ?? diagnosis.contextSource);
 
@@ -971,6 +1117,10 @@ function Result({
       <div data-testid="primary-action-review">
         <ActionDecisionPair copy={copy} reviewDate={reviewDate} />
       </div>
+
+      <SourceSupport memo={memo} />
+
+      <TuneBeforeSaving memo={memo} onUpdateMemo={onUpdateMemo} />
 
       <ShortDiagnosis copy={copy} />
 
@@ -1208,7 +1358,17 @@ export function HomeLoop() {
   }
 
   function downloadHistoryLoopText(item: SavedMemo) {
-    downloadLoopTextForMemo(item, reviewDateFromCreatedAt(item.createdAt));
+    downloadLoopTextForMemo(item);
+  }
+
+  function updateCurrentMemo(patch: Partial<SavedMemo>) {
+    setMemo((current) => (current ? { ...current, ...patch } : current));
+    setCopiedMemo(false);
+    setSavedCurrentLoop(false);
+    setSavedReviewDate("");
+    setRetentionMessage("");
+    setRetentionError("");
+    resetNotion();
   }
 
   async function saveLoop() {
@@ -1322,6 +1482,7 @@ export function HomeLoop() {
         onCopyReviewReminder={copyCurrentReviewReminder}
         onDownloadLoopText={downloadCurrentLoopText}
         onExportToNotion={exportCurrentMemoToNotion}
+        onUpdateMemo={updateCurrentMemo}
       />
     );
   }
