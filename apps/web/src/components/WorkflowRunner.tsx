@@ -7,6 +7,7 @@ import {
   DEFAULT_CONTEXT_SOURCE_ID,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  applyMemoEdits,
   buildReviewCalendarIcs,
   contextSourceForId,
   createDiagnosis,
@@ -66,6 +67,7 @@ const fieldSets: Partial<Record<WorkflowId, FieldSpec[]>> = {
   ],
   "hiring-bottleneck": [
     { key: "role", label: "Role" },
+    { key: "hiringPriority", label: "Hiring priority" },
     { key: "candidate", label: "Candidate" },
     { key: "stage", label: "Stage" },
     { key: "daysInStage", label: "Days in stage" },
@@ -93,7 +95,8 @@ const fieldSets: Partial<Record<WorkflowId, FieldSpec[]>> = {
     { key: "reportingPeriod", label: "Reporting period" },
     { key: "keyWins", label: "Key wins", multiline: true },
     { key: "keyRisks", label: "Key risks", multiline: true },
-    { key: "investorAsks", label: "Investor asks", multiline: true }
+    { key: "investorAsks", label: "Investor asks", multiline: true },
+    { key: "metricsSnapshot", label: "Metrics snapshot", multiline: true }
   ]
 };
 
@@ -289,7 +292,7 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
   }
 
   function updateMemo(patch: Partial<SavedMemo>) {
-    setMemo((current) => (current ? { ...current, ...patch } : current));
+    setMemo((current) => (current ? applyMemoEdits(current, patch) : current));
     setCopiedMemo(false);
     setSaved(false);
     setSavedReviewDate("");

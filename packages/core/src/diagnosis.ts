@@ -130,9 +130,10 @@ export function extractCompanyOrDealNames(rawInput: string): string[] {
     "next step",
     "last activity",
     "days stuck",
-    "days in stage"
+    "days in stage",
+    "owner"
   ]);
-  const namedFieldLabels = new Set(["company", "account", "customer", "candidate", "owner", "deal", "deal name"]);
+  const namedFieldLabels = new Set(["company", "account", "customer", "candidate", "deal", "deal name"]);
   const blockedTailWords = new Set(["stage", "owner", "status", "role", "metric", "date", "priority", "source"]);
   const candidates: string[] = [];
 
@@ -196,8 +197,8 @@ export function createDiagnosis(
     confidence: detected.confidence,
     matchedKeywords: detected.matchedKeywords,
     extractedCompaniesOrDeals: uniqueValues([
-      ...extractCompanyOrDealNames(rawInput),
-      ...structuredEntityCandidates(structuredContext)
+      ...structuredEntityCandidates(structuredContext),
+      ...extractCompanyOrDealNames(rawInput)
     ]).slice(0, 6),
     extractedRiskSignals: extractRiskSignals(rawInput),
     structuredContext,

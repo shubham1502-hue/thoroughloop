@@ -8,6 +8,7 @@ import {
   CONTEXT_SOURCE_OPTIONS,
   STORAGE_KEYS,
   WORKFLOWS,
+  applyMemoEdits,
   contextSourceForId,
   contextSourceLabelForId,
   createDiagnosis,
@@ -1362,7 +1363,7 @@ export function HomeLoop() {
   }
 
   function updateCurrentMemo(patch: Partial<SavedMemo>) {
-    setMemo((current) => (current ? { ...current, ...patch } : current));
+    setMemo((current) => (current ? applyMemoEdits(current, patch) : current));
     setCopiedMemo(false);
     setSavedCurrentLoop(false);
     setSavedReviewDate("");

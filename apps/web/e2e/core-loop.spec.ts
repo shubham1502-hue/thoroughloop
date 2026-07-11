@@ -144,6 +144,7 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   expect(copiedMemo).toContain("Should we keep founder-led follow-up on these two accounts next week?");
   expect(copiedMemo).toContain("2026-07-21");
   expect(copiedMemo).toContain("Two late-stage accounts with confirmed next steps.");
+  expect(copiedMemo).not.toContain("Send one founder-led follow-up to FinCore Labs");
 
   await page.locator("[data-testid='supporting-context'] summary").click();
   await expect(page.getByText("Why this is the bottleneck")).toBeVisible();
@@ -197,6 +198,7 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   expect(textContents).toContain("Call FinCore and BrightLayer today");
   expect(textContents).toContain("Both accounts have one owner");
   expect(textContents).toContain("Two late-stage accounts with confirmed next steps.");
+  expect(textContents).not.toContain("Send one founder-led follow-up to FinCore Labs");
 
   await page.getByRole("button", { name: "Start new loop" }).click();
   await expect(page.getByRole("heading", { name: "Saved loops" })).toBeVisible();
@@ -209,7 +211,9 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Saved founder memos" })).toBeVisible();
   await expect(page.getByText("Revenue Rescue: FinCore Labs")).toBeVisible();
   await expect(page.getByText("Source: Slack thread or channel notes")).toBeVisible();
-  await expect(page.getByText("Call FinCore and BrightLayer today")).toBeVisible();
+  await expect(page.getByTestId("saved-memo-detail-grid")).toContainText(
+    "Call FinCore and BrightLayer today, assign one owner, and confirm the next decision step."
+  );
   await expect(page.getByText("Both accounts have one owner")).toBeVisible();
   await expect(page.getByText("Jul 21, 2026")).toBeVisible();
   const savedMemoOrder = await page.getByTestId("saved-memo-detail-grid").evaluate((grid) => {
@@ -349,6 +353,14 @@ test("workflow route uses structured context and the canonical atomic save", asy
   expect(savedCollections.decisions[0].metricToWatch).toBe("One confirmed buyer decision step");
 
   await page.getByRole("button", { name: "Start new loop", exact: true }).click();
+  await expect(page.getByLabel("Messy context", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Deal name", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Stage", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Owner", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Where is this context coming from?")).toHaveValue("general_notes");
+  await expect(page.getByTestId("source-support")).toHaveCount(0);
+  await expect(page.getByTestId("tune-before-saving")).toHaveCount(0);
+  await expect(page.getByText("Saved. Review this next week.")).toHaveCount(0);
   await page.getByLabel("Messy context", { exact: true }).fill("Need to fix follow ups.");
   await page.getByRole("button", { name: "Diagnose this mess", exact: true }).click();
   await page.getByRole("button", { name: "Generate founder memo", exact: true }).click();
@@ -356,4 +368,135 @@ test("workflow route uses structured context and the canonical atomic save", asy
     "No strong source snippet found. Add more concrete notes before trusting this task."
   );
   await expect(page.getByTestId("tune-before-saving")).toBeVisible();
+});
+
+test("workflow forms expose structured fields required by missing-context checks", async ({ page }) => {
+  await page.goto("/workflows/investor-update");
+  await page.getByLabel("Reporting period", { exact: true }).fill("July 2026");
+  await page.getByLabel("Key wins", { exact: true }).fill("Two enterprise demos completed");
+  await page.getByLabel("Key risks", { exact: true }).fill("Activation remains flat");
+  await page.getByLabel("Investor asks", { exact: true }).fill("Three CFO introductions");
+  await page.getByLabel("Metrics snapshot", { exact: true }).fill("MRR is flat and runway is 14 months");
+  await page.getByRole("button", { name: "Diagnose this mess", exact: true }).click();
+  await expect(page.getByTestId("diagnosis-missing-context")).toContainText("None detected");
+
+  await page.goto("/workflows/hiring-bottleneck");
+  await page.getByLabel("Role", { exact: true }).fill("Founding Account Executive");
+  await page.getByLabel("Hiring priority", { exact: true }).fill("High");
+  await page.getByLabel("Stage", { exact: true }).fill("Final interview");
+  await page.getByLabel("Owner", { exact: true }).fill("Founder");
+  await page.getByLabel("Next step", { exact: true }).fill("Make the final candidate decision");
+  await page.getByRole("button", { name: "Diagnose this mess", exact: true }).click();
+  await expect(page.getByTestId("diagnosis-missing-context")).toContainText("None detected");
+});
+
+test("legacy records render and remain alongside a newly saved canonical loop", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.localStorage.setItem(
+      "founder_os_lite_memos",
+      JSON.stringify([
+        {
+          id: "legacy_memo",
+          createdAt: "2026-07-01T09:00:00.000Z",
+          workflow: "Revenue Rescue",
+          title: "Legacy Revenue Rescue memo",
+          problem: "A legacy account is waiting for a decision.",
+          evidence: "Legacy evidence remains readable.",
+          diagnosis: "Legacy diagnosis",
+          recommendedDecision: "Review the legacy account next week.",
+          founderAction: "Send the legacy follow-up.",
+          owner: "Founder",
+          dueDate: "2026-07-02",
+          metricToWatch: "Legacy confirmed next steps",
+          ignoreThisWeek: "Ignore unrelated work.",
+          assumptionsMade: [],
+          investorSafeSummary: "Legacy summary",
+          rawInput: "Legacy founder notes"
+        }
+      ])
+    );
+    window.localStorage.setItem(
+      "founder_os_lite_actions",
+      JSON.stringify([
+        {
+          id: "legacy_action",
+          createdAt: "2026-07-01T09:00:00.000Z",
+          workflow: "Revenue Rescue",
+          founderAction: "Send the legacy follow-up.",
+          whyItMatters: "Legacy diagnosis",
+          owner: "Founder",
+          priority: "High",
+          dueDate: "2026-07-02",
+          status: "Open",
+          metricToWatch: "Legacy confirmed next steps",
+          followUpResult: "",
+          decisionStatus: "Open"
+        }
+      ])
+    );
+    window.localStorage.setItem(
+      "founder_os_lite_decisions",
+      JSON.stringify([
+        {
+          id: "legacy_decision",
+          createdAt: "2026-07-01T09:00:00.000Z",
+          workflow: "Revenue Rescue",
+          decisionRecommended: "Review the legacy account next week.",
+          evidenceUsed: "Legacy evidence remains readable.",
+          actionAssigned: "Send the legacy follow-up.",
+          owner: "Founder",
+          metricToWatch: "Legacy confirmed next steps",
+          reviewDate: "2026-07-08",
+          outcomeNote: "",
+          status: "Open"
+        }
+      ])
+    );
+  });
+
+  await page.goto("/memos");
+  await expect(page.getByText("Legacy Revenue Rescue memo")).toBeVisible();
+  await page.getByPlaceholder("Search memos").fill("Legacy");
+  await expect(page.getByText("Send the legacy follow-up.")).toBeVisible();
+
+  await page.goto("/action-queue");
+  await expect(page.getByRole("heading", { name: "Send the legacy follow-up." })).toBeVisible();
+  await page.getByLabel("Follow-up result", { exact: true }).fill("Legacy follow-up completed");
+  await page.getByRole("button", { name: "Save update", exact: true }).click();
+  await expect(page.getByText("Founder action updated")).toBeVisible();
+
+  await page.goto("/decision-log");
+  await expect(page.getByRole("heading", { name: "Review the legacy account next week." })).toBeVisible();
+  await page.getByLabel("Outcome note", { exact: true }).fill("Legacy outcome recorded");
+  await page.getByRole("button", { name: "Save update", exact: true }).click();
+  await expect(page.getByText("Decision updated")).toBeVisible();
+
+  await page.goto("/workflows/revenue-rescue");
+  await page.getByLabel("Messy context", { exact: true }).fill(
+    "DemoCo is stuck after pricing and the proposal still needs one buyer decision."
+  );
+  await page.getByLabel("Deal name", { exact: true }).fill("DemoCo");
+  await page.getByRole("button", { name: "Diagnose this mess", exact: true }).click();
+  await page.getByRole("button", { name: "Generate founder memo", exact: true }).click();
+  await page.getByRole("button", { name: "Save action and review decision", exact: true }).click();
+
+  const recordState = await page.evaluate(() => {
+    const memos = JSON.parse(window.localStorage.getItem("founder_os_lite_memos") ?? "[]");
+    const actions = JSON.parse(window.localStorage.getItem("founder_os_lite_actions") ?? "[]");
+    const decisions = JSON.parse(window.localStorage.getItem("founder_os_lite_decisions") ?? "[]");
+    return {
+      memoIds: memos.map((item: { id: string }) => item.id),
+      actionIds: actions.map((item: { id: string }) => item.id),
+      decisionIds: decisions.map((item: { id: string }) => item.id)
+    };
+  });
+
+  expect(recordState.memoIds).toHaveLength(2);
+  expect(recordState.actionIds).toHaveLength(2);
+  expect(recordState.decisionIds).toHaveLength(2);
+  expect(recordState.memoIds).toContain("legacy_memo");
+  expect(recordState.actionIds).toContain("legacy_action");
+  expect(recordState.decisionIds).toContain("legacy_decision");
 });

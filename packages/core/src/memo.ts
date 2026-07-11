@@ -35,14 +35,22 @@ function neutralSubject(workflow: WorkflowName): string {
 }
 
 function subjectFromDiagnosis(diagnosis: FounderDiagnosis, settings?: Partial<Settings>): string {
-  const extractedSubject = diagnosis.extractedCompaniesOrDeals.find((item) => item.trim())?.trim();
   const structuredSubject = structuredSubjectCandidates(
     diagnosis.workflow.id,
     diagnosis.structuredContext
   )[0];
+  const extractedSubject = diagnosis.extractedCompaniesOrDeals.find((item) => item.trim())?.trim();
   const settingsSubject = settings?.companyName?.trim();
 
-  return extractedSubject || structuredSubject || settingsSubject || neutralSubject(diagnosis.workflow.name);
+  if (structuredSubject) {
+    return structuredSubject;
+  }
+
+  if (diagnosis.workflow.id === "weekly-review") {
+    return settingsSubject || neutralSubject(diagnosis.workflow.name);
+  }
+
+  return extractedSubject || settingsSubject || neutralSubject(diagnosis.workflow.name);
 }
 
 function withoutTerminalPunctuation(value: string): string {
@@ -57,6 +65,35 @@ function lowerFirst(value: string): string {
 function asSentence(value: string): string {
   const trimmed = withoutTerminalPunctuation(value);
   return trimmed ? `${trimmed}.` : "";
+}
+
+function withTerminalPunctuation(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "Not provided.";
+  }
+
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+function asDecisionQuestion(value: string): string {
+  const original = value.trim();
+  const trimmed = withoutTerminalPunctuation(original);
+
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/^whether\b/i.test(trimmed)) {
+    return `Decide ${lowerFirst(trimmed)}?`;
+  }
+
+  if (original.endsWith("?") || /^(should|can|could|will|would|do|does|is|are|has|have)\b/i.test(trimmed)) {
+    return `${trimmed}?`;
+  }
+
+  return `Decide: ${asSentence(trimmed)}`;
 }
 
 type MemoCopy = Pick<
@@ -89,7 +126,7 @@ function memoCopyForWorkflow(diagnosis: FounderDiagnosis, subject: string): Memo
   if (workflow === "Revenue Rescue") {
     const nextStep = structuredContextValue(fields, "nextStep");
     const founderAction = nextStep
-      ? `Follow up with ${subject} and ${lowerFirst(asSentence(nextStep))}`
+      ? `Follow up with ${subject} and complete this next step: ${asSentence(nextStep)}`
       : `Send one founder-led follow-up to ${subject} and confirm the next decision step.`;
     const recommendedDecision = `Decide whether ${subject} should remain in founder-led follow-up next week.`;
 
@@ -107,7 +144,7 @@ function memoCopyForWorkflow(diagnosis: FounderDiagnosis, subject: string): Memo
   if (workflow === "Onboarding Risk") {
     const nextMilestone = structuredContextValue(fields, "nextMilestone");
     const founderAction = nextMilestone
-      ? `Confirm ${subject}'s blocker and secure the next milestone: ${lowerFirst(asSentence(nextMilestone))}`
+      ? `Confirm the blocker for ${subject} and secure the next milestone: ${asSentence(nextMilestone)}`
       : `Contact the owner for ${subject} and confirm the blocker, next milestone, and date to activation.`;
     const recommendedDecision = `Decide whether ${subject} needs founder intervention to unblock activation.`;
 
@@ -124,41 +161,44 @@ function memoCopyForWorkflow(diagnosis: FounderDiagnosis, subject: string): Memo
 
   if (workflow === "Hiring Bottleneck") {
     const structuredRole = structuredContextValue(fields, "role");
-    const role = structuredRole || "priority role";
+    const role = structuredRole.replace(/^the\s+/i, "") || "priority role";
     const rolePhrase = structuredRole ? `the ${role}` : "the priority hiring";
+    const decisionLabel = `${rolePhrase} decision`;
     const candidate = structuredContextValue(fields, "candidate");
     const nextStep = structuredContextValue(fields, "nextStep");
     const candidateClause = candidate ? ` for ${candidate}` : "";
+    const processSubject = `${rolePhrase.charAt(0).toUpperCase()}${rolePhrase.slice(1)} process`;
     const founderAction = nextStep
-      ? `Resolve ${rolePhrase} decision${candidateClause}: ${lowerFirst(asSentence(nextStep))}`
-      : `Close ${rolePhrase} decision${candidateClause} and document the reason.`;
+      ? `Resolve ${decisionLabel}${candidateClause}: ${asSentence(nextStep)}`
+      : `Close ${decisionLabel}${candidateClause} and document the reason.`;
     const recommendedDecision = candidate
-      ? `Decide whether ${candidate} should advance for ${role}.`
+      ? `Decide whether ${candidate} should advance for ${rolePhrase}.`
       : `Decide whether the current ${role} process should advance, pause, or change.`;
 
     return {
       title: `Hiring Bottleneck: ${subject}`,
       problem: `${subject} needs a hiring decision because the current role or candidate flow appears stuck.`,
-      diagnosis: `Hiring Bottleneck: the bottleneck is the unresolved ${role} decision${candidateClause}.`,
+      diagnosis: `Hiring Bottleneck: the bottleneck is ${decisionLabel}${candidateClause}.`,
       recommendedDecision,
       founderAction,
-      doneWhen: `${candidate || role} is advanced, rejected, or paused with one written reason.`,
+      doneWhen: `${candidate || processSubject} is advanced, rejected, or paused with one written reason.`,
       investorSafeSummary: `Hiring Bottleneck: ${recommendedDecision} The next founder action is to ${lowerFirst(founderAction)}`
     };
   }
 
   if (workflow === "Investor Update") {
     const reportingPeriod = structuredContextValue(fields, "reportingPeriod") || "current period";
+    const periodReference = reportingPeriod === "current period" ? "the current period" : reportingPeriod;
     const investorAsk = structuredContextValue(fields, "investorAsks");
     const founderAction = investorAsk
       ? `Draft the ${reportingPeriod} investor update and make the ask explicit: ${asSentence(investorAsk)}`
       : `Draft the ${reportingPeriod} investor update around progress, risks, metrics, and one clear ask.`;
-    const recommendedDecision = `Decide the investor narrative and ask that should be shared for the ${reportingPeriod}.`;
+    const recommendedDecision = `Decide the investor narrative and ask that should be shared for ${periodReference}.`;
 
     return {
       title: `Investor Update: ${subject}`,
       problem: `${subject} needs a clearer investor narrative that separates progress, risks, and asks.`,
-      diagnosis: `Investor Update: the bottleneck is narrative discipline for the ${reportingPeriod}, not update volume.`,
+      diagnosis: `Investor Update: the bottleneck is narrative discipline for ${periodReference}, not update volume.`,
       recommendedDecision,
       founderAction,
       doneWhen: `The update has one progress section, one risk section, one metrics snapshot, and one explicit ask.`,
@@ -175,14 +215,12 @@ function memoCopyForWorkflow(diagnosis: FounderDiagnosis, subject: string): Memo
       ? "Choose one product feedback theme to test this week and park the rest."
       : "Choose one operating focus for next week and close or defer the rest of the decision queue.";
   const recommendedDecision = decisions
-    ? /^whether\b/i.test(decisions.trim())
-      ? `Decide ${lowerFirst(withoutTerminalPunctuation(decisions))}?`
-      : `Decide: ${asSentence(decisions)}`
+    ? asDecisionQuestion(decisions)
     : isProductFeedback
       ? "Decide which product feedback theme deserves founder attention next week."
       : "Decide the one operating focus that should receive founder attention next week.";
   const diagnosisCopy = decisions
-    ? `Weekly Operating Review: the bottleneck is the unresolved founder decision: ${asSentence(decisions)}`
+    ? "Weekly Operating Review: the bottleneck is the unresolved founder decision, not more context."
     : isProductFeedback
       ? "Weekly Operating Review: the bottleneck is prioritization, not customer feedback volume."
       : "Weekly Operating Review: the bottleneck is operating focus, not more context.";
@@ -271,6 +309,19 @@ export function generateFounderMemo(
     investorSafeSummary: copy.investorSafeSummary,
     rawInput: diagnosis.rawInput
   };
+}
+
+export function applyMemoEdits(memo: SavedMemo, patch: Partial<SavedMemo>): SavedMemo {
+  const nextMemo = { ...memo, ...patch };
+
+  if ("founderAction" in patch || "recommendedDecision" in patch) {
+    nextMemo.investorSafeSummary = [
+      `${nextMemo.workflow}: ${withTerminalPunctuation(nextMemo.recommendedDecision)}`,
+      `Founder action: ${withTerminalPunctuation(nextMemo.founderAction)}`
+    ].join(" ");
+  }
+
+  return nextMemo;
 }
 
 export function memoToFounderAction(memo: SavedMemo): SavedFounderAction {
