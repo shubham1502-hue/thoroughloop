@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 
 const messyFounderContext =
@@ -20,6 +20,45 @@ async function expectSectionOrder(page: Page, firstTestId: string, secondTestId:
   );
 
   expect(order).toBe(true);
+}
+
+async function expectReadableContrast(locator: Locator) {
+  const result = await locator.evaluate((element) => {
+    function channels(value: string): [number, number, number, number] {
+      const parts = value.match(/[\d.]+/g)?.map(Number) ?? [];
+      return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts[3] ?? 1];
+    }
+
+    function luminance([red, green, blue]: [number, number, number, number]): number {
+      const values = [red, green, blue].map((value) => {
+        const channel = value / 255;
+        return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+      return values[0] * 0.2126 + values[1] * 0.7152 + values[2] * 0.0722;
+    }
+
+    const foreground = getComputedStyle(element).color;
+    let backgroundElement: Element | null = element;
+    let background = "rgba(0, 0, 0, 0)";
+
+    while (backgroundElement) {
+      background = getComputedStyle(backgroundElement).backgroundColor;
+      if (channels(background)[3] > 0) {
+        break;
+      }
+      backgroundElement = backgroundElement.parentElement;
+    }
+
+    const foregroundLuminance = luminance(channels(foreground));
+    const backgroundLuminance = luminance(channels(background));
+    const ratio =
+      (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) /
+      (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+
+    return { foreground, background, ratio };
+  });
+
+  expect(result.ratio, `${result.foreground} on ${result.background}`).toBeGreaterThanOrEqual(4.5);
 }
 
 test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
@@ -73,10 +112,10 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await page.getByTestId("messy-context-input").fill(messyFounderContext);
   await page.getByRole("button", { name: "Close the loop" }).click();
 
-  await expect(page.getByRole("heading", { name: "The bottleneck is discovery quality, not pricing." })).toBeVisible();
-  await expect(page.getByText("TL;DR: Discovery quality, not pricing.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Revenue Rescue: the bottleneck is the unresolved next decision for FinCore Labs." })).toBeVisible();
+  await expect(page.getByText("TL;DR: Revenue Rescue: FinCore Labs")).toBeVisible();
   await expect(page.getByText("Source · Slack thread or channel notes")).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Sit in on the next two discovery calls/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Send one founder-led follow-up to FinCore Labs/ })).toBeVisible();
   await expect(page.getByText("Review ·")).toBeVisible();
   await expect(page.getByTestId("primary-action-review")).toBeVisible();
   await expect(page.getByTestId("source-support")).toBeVisible();
@@ -161,14 +200,14 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
 
   await page.getByRole("button", { name: "Start new loop" }).click();
   await expect(page.getByRole("heading", { name: "Saved loops" })).toBeVisible();
-  await expect(page.getByText("Discovery quality, not pricing.").first()).toBeVisible();
+  await expect(page.getByText("Revenue Rescue: FinCore Labs").first()).toBeVisible();
   await expect(page.getByText("Source · Slack thread or channel notes")).toBeVisible();
   await expect(page.getByText("Call FinCore and BrightLayer today")).toBeVisible();
   await expect(page.getByText("Both accounts have one owner")).toBeVisible();
 
   await page.goto("/memos");
   await expect(page.getByRole("heading", { name: "Saved founder memos" })).toBeVisible();
-  await expect(page.getByText("Discovery quality, not pricing.")).toBeVisible();
+  await expect(page.getByText("Revenue Rescue: FinCore Labs")).toBeVisible();
   await expect(page.getByText("Source: Slack thread or channel notes")).toBeVisible();
   await expect(page.getByText("Call FinCore and BrightLayer today")).toBeVisible();
   await expect(page.getByText("Both accounts have one owner")).toBeVisible();
@@ -186,7 +225,7 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   expect(savedMemoOrder).toBe(true);
 
   await page.reload();
-  await expect(page.getByText("Discovery quality, not pricing.")).toBeVisible();
+  await expect(page.getByText("Revenue Rescue: FinCore Labs")).toBeVisible();
 
   await page.goto("/action-queue");
   await expect(page.getByRole("heading", { name: "One action per memo" })).toBeVisible();
@@ -204,4 +243,117 @@ test("founder can complete the ThoroughLoop browser loop", async ({ page }) => {
   await page.goto("/workflows/weekly-review");
   await expect(page.getByRole("heading", { name: "Review previous decision" })).toBeVisible();
   await expect(page.getByText("Should we keep founder-led follow-up on these two accounts next week?")).toBeVisible();
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 }
+  ]) {
+    await page.setViewportSize(viewport);
+
+    await page.goto("/workflows");
+    await expectReadableContrast(page.getByRole("heading", { name: "Revenue Rescue", exact: true }));
+
+    await page.goto("/memos");
+    await expectReadableContrast(page.getByRole("heading", { name: "Revenue Rescue: FinCore Labs", exact: true }));
+    await expectReadableContrast(page.getByPlaceholder("Search memos", { exact: true }));
+
+    await page.goto("/action-queue");
+    await expectReadableContrast(
+      page.getByRole("heading", {
+        name: "Call FinCore and BrightLayer today, assign one owner, and confirm the next decision step.",
+        exact: true
+      })
+    );
+    await expectReadableContrast(page.getByLabel("Owner", { exact: true }));
+
+    await page.goto("/decision-log");
+    await expectReadableContrast(
+      page.getByRole("heading", {
+        name: "Should we keep founder-led follow-up on these two accounts next week?",
+        exact: true
+      })
+    );
+    await expectReadableContrast(page.getByLabel("Metric to watch", { exact: true }));
+
+    await page.goto("/settings");
+    await expectReadableContrast(page.getByText("Founder name", { exact: true }));
+    await expectReadableContrast(page.getByLabel("Founder name", { exact: true }));
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+  }
+});
+
+test("workflow route uses structured context and the canonical atomic save", async ({ page }) => {
+  await page.goto("/workflows/revenue-rescue");
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+    origin: new URL(page.url()).origin
+  });
+  await page.evaluate(() => window.localStorage.clear());
+  await page.reload();
+
+  const rawNotes =
+    "FinCore Labs has been stuck after pricing. The buyer has not confirmed who owns the final decision. The proposal is open and founder follow-up is overdue.";
+  await page.getByLabel("Messy context", { exact: true }).fill(rawNotes);
+  await page.getByLabel("Deal name", { exact: true }).fill("FinCore Labs");
+  await page.getByLabel("Stage", { exact: true }).fill("Negotiation");
+  await page.getByLabel("Owner", { exact: true }).fill("Founder");
+  await page.getByLabel("Last activity", { exact: true }).fill("Pricing discussion 12 days ago");
+  await page.getByLabel("Next step", { exact: true }).fill("Confirm commercial objection and decision process");
+  await page.getByRole("button", { name: "Diagnose this mess", exact: true }).click();
+
+  const missingContext = page.getByTestId("diagnosis-missing-context");
+  await expect(missingContext).toContainText("Deal value");
+  await expect(missingContext).toContainText("Close probability");
+  await expect(missingContext).not.toContainText("Owner");
+  await expect(missingContext).not.toContainText("Last activity date");
+  await expect(missingContext).not.toContainText("Next step");
+  await expect(page.getByText("FinCore Labs Stage", { exact: true })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Generate founder memo", exact: true }).click();
+  await expect(page.getByTestId("source-support")).toBeVisible();
+  await expect(page.getByTestId("source-support")).toContainText("FinCore Labs has been stuck after pricing.");
+  await expect(page.getByTestId("tune-before-saving")).toBeVisible();
+  await expect(page.getByText("Deadline logic", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Follow up with FinCore Labs/ })).toBeVisible();
+
+  await page.locator("[data-testid='supporting-context'] summary").click();
+  await expect(page.getByText("Deal name: FinCore Labs", { exact: true })).toBeVisible();
+  await expect(page.getByText("Stage: Negotiation", { exact: true })).toBeVisible();
+
+  await page.getByTestId("editable-founder-action").fill("Call FinCore before Friday and confirm the commercial objection.");
+  await page.getByTestId("editable-review-decision").fill("Should FinCore remain in founder-led follow-up next week?");
+  await page.getByTestId("editable-review-date").fill("2026-07-24");
+  await page.getByTestId("editable-metric").fill("One confirmed buyer decision step");
+  await page.getByRole("button", { name: "Save action and review decision", exact: true }).click();
+
+  const savedButton = page.getByRole("button", { name: "Action and decision saved", exact: true });
+  await expect(savedButton).toBeDisabled();
+  const savedCollections = await page.evaluate(() => {
+    const memos = JSON.parse(window.localStorage.getItem("founder_os_lite_memos") ?? "[]");
+    const actions = JSON.parse(window.localStorage.getItem("founder_os_lite_actions") ?? "[]");
+    const decisions = JSON.parse(window.localStorage.getItem("founder_os_lite_decisions") ?? "[]");
+    return { memos, actions, decisions };
+  });
+
+  expect(savedCollections.memos).toHaveLength(1);
+  expect(savedCollections.actions).toHaveLength(1);
+  expect(savedCollections.decisions).toHaveLength(1);
+  expect(savedCollections.actions[0].sourceMemoId).toBe(savedCollections.memos[0].id);
+  expect(savedCollections.decisions[0].sourceMemoId).toBe(savedCollections.memos[0].id);
+  expect(savedCollections.actions[0].founderAction).toContain("Call FinCore before Friday");
+  expect(savedCollections.decisions[0].decisionRecommended).toContain("Should FinCore remain");
+  expect(savedCollections.decisions[0].reviewDate).toBe("2026-07-24");
+  expect(savedCollections.decisions[0].metricToWatch).toBe("One confirmed buyer decision step");
+
+  await page.getByRole("button", { name: "Start new loop", exact: true }).click();
+  await page.getByLabel("Messy context", { exact: true }).fill("Need to fix follow ups.");
+  await page.getByRole("button", { name: "Diagnose this mess", exact: true }).click();
+  await page.getByRole("button", { name: "Generate founder memo", exact: true }).click();
+  await expect(page.getByTestId("source-support")).toContainText(
+    "No strong source snippet found. Add more concrete notes before trusting this task."
+  );
+  await expect(page.getByTestId("tune-before-saving")).toBeVisible();
 });

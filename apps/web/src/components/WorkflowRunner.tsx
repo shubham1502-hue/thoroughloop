@@ -3,27 +3,37 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
+  CONTEXT_SOURCE_OPTIONS,
+  DEFAULT_CONTEXT_SOURCE_ID,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
-  appendCollectionItem,
+  buildReviewCalendarIcs,
+  contextSourceForId,
   createDiagnosis,
+  formatLoopTextBackup,
   formatMemoForCopy,
+  formatReviewReminder,
   generateFounderMemo,
   generateInvestorUpdateVersions,
   getWorkflowById,
-  memoToDecision,
-  memoToFounderAction,
   readCollection,
   readJson,
   replaceCollectionItem,
+  reviewDateForMemo,
+  safeFileDate,
+  saveSavedLoop,
+  type ContextSourceId,
   type FounderDiagnosis,
   type SavedDecision,
   type SavedMemo,
   type Settings,
   type Status,
+  type StructuredContextField,
   type WorkflowId
 } from "@thoroughloop/core";
-import { DiagnosisPreview, EditableMemo, SaveActions, inputClass } from "@/components/DiagnosisResult";
+import { DiagnosisPreview, inputClass } from "@/components/DiagnosisResult";
+import { CanonicalLoopResult, downloadClientFile } from "@/components/HomeLoop";
+import { useNotionExport } from "@/hooks/useNotionExport";
 import { webLocalStorageAdapter } from "@/storage/webLocalStorageAdapter";
 
 type FieldSpec = {
@@ -89,16 +99,17 @@ const fieldSets: Partial<Record<WorkflowId, FieldSpec[]>> = {
 
 const statusValues: Status[] = ["Open", "In Progress", "Done", "Blocked", "Reviewed"];
 
-function composeContext(rawInput: string, fields: FieldSpec[], values: Record<string, string>): string {
-  const structured = fields
-    .map((field) => {
-      const value = values[field.key]?.trim();
-      return value ? `${field.label}: ${value}` : "";
-    })
-    .filter(Boolean)
-    .join("\n");
-
-  return [rawInput.trim(), structured].filter(Boolean).join("\n\n");
+function structuredContextFromFields(
+  fields: FieldSpec[],
+  values: Record<string, string>
+): StructuredContextField[] {
+  return fields
+    .map((field) => ({
+      key: field.key,
+      label: field.label.replace(/\?$/, ""),
+      value: values[field.key]?.trim() ?? ""
+    }))
+    .filter((field) => field.value);
 }
 
 function CopyBlock({ label, value }: { label: string; value: string }) {
@@ -107,7 +118,7 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
   }
 
   return (
-    <div className="grid gap-2 rounded-lg border border-line bg-white p-4">
+    <div data-ui-surface="light" className="surface-light grid gap-2 rounded-lg border border-line bg-white p-4">
       <div className="flex items-center justify-between gap-3">
         <p className="font-semibold">{label}</p>
         <button type="button" onClick={copy} className="rounded-md border border-line px-3 py-1.5 text-sm font-semibold">
@@ -140,7 +151,7 @@ function PreviousDecisionReview() {
   }
 
   return (
-    <section className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+    <section data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
       <h2 className="text-xl font-semibold">Review previous decision</h2>
       {latestDecision ? (
         <div className="mt-4 grid gap-4">
@@ -221,10 +232,16 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
   const [savedMemos, setSavedMemos] = useState<SavedMemo[]>([]);
   const [selectedMemoId, setSelectedMemoId] = useState("");
   const [tone, setTone] = useState("Neutral");
+  const [selectedSourceId, setSelectedSourceId] = useState<ContextSourceId>(DEFAULT_CONTEXT_SOURCE_ID);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [diagnosis, setDiagnosis] = useState<FounderDiagnosis | null>(null);
   const [memo, setMemo] = useState<SavedMemo | null>(null);
-  const [confirmation, setConfirmation] = useState("");
+  const [copiedMemo, setCopiedMemo] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [savedReviewDate, setSavedReviewDate] = useState("");
+  const [retentionMessage, setRetentionMessage] = useState("");
+  const [retentionError, setRetentionError] = useState("");
+  const { status: notionStatus, exportToNotion, reset: resetNotion } = useNotionExport();
 
   useEffect(() => {
     void readJson<Settings>(webLocalStorageAdapter, STORAGE_KEYS.settings, DEFAULT_SETTINGS).then(setSettings);
@@ -233,21 +250,28 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
 
   const selectedMemo = savedMemos.find((item) => item.id === selectedMemoId);
   const selectedMemoText = selectedMemo ? formatMemoForCopy(selectedMemo) : "";
-  const composedInput = composeContext(
-    workflowId === "investor-update" && selectedMemoText ? `${selectedMemoText}\n\n${rawInput}` : rawInput,
-    fields,
-    fieldValues
-  );
+  const sourceInput =
+    workflowId === "investor-update" && selectedMemoText
+      ? [selectedMemoText, rawInput.trim()].filter(Boolean).join("\n\n")
+      : rawInput.trim();
+  const structuredContext = structuredContextFromFields(fields, fieldValues);
+  const selectedSource = contextSourceForId(selectedSourceId);
+  const hasContext = Boolean(sourceInput || structuredContext.length);
 
   function updateField(key: string, value: string) {
     setFieldValues((current) => ({ ...current, [key]: value }));
   }
 
   function runDiagnosis() {
-    const nextDiagnosis = createDiagnosis(composedInput, workflowId);
+    const nextDiagnosis = createDiagnosis(sourceInput, workflowId, selectedSourceId, structuredContext);
     setDiagnosis(nextDiagnosis);
     setMemo(null);
-    setConfirmation("");
+    setCopiedMemo(false);
+    setSaved(false);
+    setSavedReviewDate("");
+    setRetentionMessage("");
+    setRetentionError("");
+    resetNotion();
   }
 
   function generateMemo() {
@@ -256,34 +280,118 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
     }
 
     setMemo(generateFounderMemo(diagnosis, settings));
-    setConfirmation("");
+    setCopiedMemo(false);
+    setSaved(false);
+    setSavedReviewDate("");
+    setRetentionMessage("");
+    setRetentionError("");
+    resetNotion();
   }
 
-  async function saveMemo() {
+  function updateMemo(patch: Partial<SavedMemo>) {
+    setMemo((current) => (current ? { ...current, ...patch } : current));
+    setCopiedMemo(false);
+    setSaved(false);
+    setSavedReviewDate("");
+    setRetentionMessage("");
+    setRetentionError("");
+    resetNotion();
+  }
+
+  async function copyMemo() {
     if (!memo) {
       return;
     }
 
-    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.memos, memo);
-    setConfirmation("Memo saved");
+    await navigator.clipboard.writeText(formatMemoForCopy(memo));
+    setCopiedMemo(true);
   }
 
-  async function saveFounderAction() {
+  async function saveLoop() {
     if (!memo) {
       return;
     }
 
-    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.actions, memoToFounderAction(memo));
-    setConfirmation("Founder action saved");
+    try {
+      const savedLoop = await saveSavedLoop(webLocalStorageAdapter, memo);
+      setSavedMemos(savedLoop.memos);
+      setSavedReviewDate(savedLoop.records.decision.reviewDate);
+      setSaved(true);
+      setRetentionMessage("");
+      setRetentionError("");
+    } catch {
+      setSaved(false);
+      setRetentionMessage("");
+      setRetentionError("Could not save the complete loop locally. No complete save was confirmed.");
+    }
   }
 
-  async function saveDecision() {
+  function downloadReviewCalendar() {
     if (!memo) {
       return;
     }
 
-    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.decisions, memoToDecision(memo));
-    setConfirmation("Decision saved");
+    const reviewDate = reviewDateForMemo(memo, { decisionReviewDate: savedReviewDate });
+    downloadClientFile(
+      `thoroughloop-review-${safeFileDate(reviewDate)}.ics`,
+      buildReviewCalendarIcs(memo, { decisionReviewDate: savedReviewDate }),
+      "text/calendar;charset=utf-8"
+    );
+    setRetentionMessage("Review calendar downloaded");
+    setRetentionError("");
+  }
+
+  async function copyReviewReminder() {
+    if (!memo) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        formatReviewReminder(memo, { decisionReviewDate: savedReviewDate })
+      );
+      setRetentionMessage("Review reminder copied");
+      setRetentionError("");
+    } catch {
+      setRetentionMessage("");
+      setRetentionError("Could not copy reminder. You can still download the loop as text.");
+    }
+  }
+
+  function downloadLoopText() {
+    if (!memo) {
+      return;
+    }
+
+    const reviewDate = reviewDateForMemo(memo, { decisionReviewDate: savedReviewDate });
+    downloadClientFile(
+      `thoroughloop-loop-${safeFileDate(reviewDate)}.txt`,
+      formatLoopTextBackup(memo, { decisionReviewDate: savedReviewDate }),
+      "text/plain;charset=utf-8"
+    );
+    setRetentionMessage("Loop text downloaded");
+    setRetentionError("");
+  }
+
+  async function exportCurrentMemoToNotion() {
+    if (memo) {
+      await exportToNotion(memo);
+    }
+  }
+
+  function startNewLoop() {
+    setRawInput("");
+    setFieldValues({});
+    setSelectedMemoId("");
+    setSelectedSourceId(DEFAULT_CONTEXT_SOURCE_ID);
+    setDiagnosis(null);
+    setMemo(null);
+    setCopiedMemo(false);
+    setSaved(false);
+    setSavedReviewDate("");
+    setRetentionMessage("");
+    setRetentionError("");
+    resetNotion();
   }
 
   const investorVersions =
@@ -297,6 +405,40 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
         })
       : null;
 
+  if (diagnosis && memo) {
+    return (
+      <CanonicalLoopResult
+        diagnosis={diagnosis}
+        memo={memo}
+        selectedSampleId={null}
+        copied={copiedMemo}
+        saved={saved}
+        savedReviewDate={savedReviewDate}
+        retentionMessage={retentionMessage}
+        retentionError={retentionError}
+        notionState={notionStatus}
+        onStartNew={startNewLoop}
+        onCopyMemo={copyMemo}
+        onSaveLoop={saveLoop}
+        onDownloadCalendar={downloadReviewCalendar}
+        onCopyReviewReminder={copyReviewReminder}
+        onDownloadLoopText={downloadLoopText}
+        onExportToNotion={exportCurrentMemoToNotion}
+        onUpdateMemo={updateMemo}
+        supplementalContent={
+          investorVersions ? (
+            <section className="grid gap-4">
+              <h2 className="text-2xl font-semibold text-white">Copyable investor versions</h2>
+              <CopyBlock label="Full investor update" value={investorVersions.fullInvestorUpdate} />
+              <CopyBlock label="WhatsApp short version" value={investorVersions.whatsappShortVersion} />
+              <CopyBlock label="Board-style version" value={investorVersions.boardStyleVersion} />
+            </section>
+          ) : undefined
+        }
+      />
+    );
+  }
+
   return (
     <div className="mx-auto grid max-w-5xl gap-5 px-4 py-8 sm:px-5 md:gap-6 md:px-8 md:py-10">
       <div className="grid gap-3">
@@ -307,7 +449,7 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
 
       {workflowId === "weekly-review" ? <PreviousDecisionReview /> : null}
 
-      <section className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+      <section data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
         <div className="grid gap-5">
           {workflowId === "investor-update" ? (
             <label className="grid gap-2">
@@ -332,6 +474,22 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
               onChange={(event) => setRawInput(event.target.value)}
               placeholder="Paste the messy context for this workflow."
             />
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold">Where is this context coming from?</span>
+            <select
+              className={inputClass}
+              value={selectedSourceId}
+              onChange={(event) => setSelectedSourceId(event.target.value as ContextSourceId)}
+            >
+              {CONTEXT_SOURCE_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <span className="text-sm leading-6 text-muted">{selectedSource.helperText}</span>
           </label>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -369,7 +527,7 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
             <button
               type="button"
               onClick={runDiagnosis}
-              disabled={!composedInput.trim()}
+              disabled={!hasContext}
               className="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-[#9a9a92] sm:w-auto sm:py-2"
             >
               Diagnose this mess
@@ -380,25 +538,6 @@ export function WorkflowRunner({ workflowId }: { workflowId: WorkflowId }) {
 
       {diagnosis ? <DiagnosisPreview diagnosis={diagnosis} onGenerateMemo={generateMemo} /> : null}
 
-      {memo ? (
-        <div className="grid gap-4">
-          <EditableMemo memo={memo} onChange={setMemo} />
-          {investorVersions ? (
-            <section className="grid gap-4">
-              <h2 className="text-2xl font-semibold">Copyable investor versions</h2>
-              <CopyBlock label="Full investor update" value={investorVersions.fullInvestorUpdate} />
-              <CopyBlock label="WhatsApp short version" value={investorVersions.whatsappShortVersion} />
-              <CopyBlock label="Board-style version" value={investorVersions.boardStyleVersion} />
-            </section>
-          ) : null}
-          <SaveActions
-            confirmation={confirmation}
-            onSaveMemo={saveMemo}
-            onSaveAction={saveFounderAction}
-            onSaveDecision={saveDecision}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -15,7 +15,7 @@ const fields: Array<{ key: keyof Settings; label: string }> = [
 ];
 
 const inputClass =
-  "rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/15";
+  "control-light rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/15";
 
 export function SettingsForm() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -44,7 +44,7 @@ export function SettingsForm() {
         </p>
       </div>
 
-      <section className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+      <section data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
         <div className="grid gap-4 md:grid-cols-2">
           {fields.map((field) => (
             <label key={field.key} className="grid gap-2">

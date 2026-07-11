@@ -14,7 +14,7 @@ export default function WorkflowsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {WORKFLOWS.map((workflow) => (
-          <article key={workflow.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+          <article key={workflow.id} data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
             <div className="flex h-full flex-col gap-4">
               <div>
                 <h2 className="text-xl font-semibold sm:text-2xl">{workflow.name}</h2>
