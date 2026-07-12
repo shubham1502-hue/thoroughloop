@@ -31,7 +31,7 @@ export const founderContextFixtures: FounderContextFixture[] = [
       "Three customers mentioned different roadmap changes. The founder has call notes, product feedback, and unclear priority tradeoffs but no single operating focus for next week.",
     expectedWorkflow: "Weekly Operating Review",
     expectedKeyRiskSignal: "Context is too thin to extract strong risk signals",
-    expectedFounderActionTheme: "operating focus"
+    expectedFounderActionTheme: "product feedback theme"
   },
   {
     name: "Hiring pipeline ownership confusion",
@@ -39,7 +39,7 @@ export const founderContextFixtures: FounderContextFixture[] = [
       "Hiring for the first customer success role is stuck. Candidate interviews are complete, the trial task has feedback, and the recruiter does not know who owns the offer decision.",
     expectedWorkflow: "Hiring Bottleneck",
     expectedKeyRiskSignal: "Hiring bottleneck detected",
-    expectedFounderActionTheme: "hiring bottleneck"
+    expectedFounderActionTheme: "priority hiring"
   },
   {
     name: "Investor update preparation chaos",

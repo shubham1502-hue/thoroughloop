@@ -16,7 +16,7 @@ import { webLocalStorageAdapter } from "@/storage/webLocalStorageAdapter";
 const statusValues: Status[] = ["Open", "In Progress", "Done", "Blocked", "Reviewed"];
 
 const inputClass =
-  "rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/15";
+  "control-light rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/15";
 
 export function DecisionLog() {
   const [decisions, setDecisions] = useState<SavedDecision[]>([]);
@@ -54,7 +54,7 @@ export function DecisionLog() {
       {decisions.length ? (
         <div className="grid gap-4">
           {decisions.map((decision) => (
-            <article key={decision.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+            <article key={decision.id} data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
               <div className="grid gap-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -133,7 +133,7 @@ export function DecisionLog() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+        <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
           <p className="font-semibold text-ink">No decisions saved yet.</p>
           <p>This page stores the decision to review next week after a founder memo is generated. It is empty because no decision has been saved on this device yet.</p>
           <p>

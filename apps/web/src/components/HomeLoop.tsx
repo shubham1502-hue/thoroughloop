@@ -8,7 +8,7 @@ import {
   CONTEXT_SOURCE_OPTIONS,
   STORAGE_KEYS,
   WORKFLOWS,
-  appendCollectionItem,
+  applyMemoEdits,
   contextSourceForId,
   contextSourceLabelForId,
   createDiagnosis,
@@ -18,12 +18,11 @@ import {
   formatMemoForCopy,
   formatReviewReminder,
   generateFounderMemo,
-  memoToDecision,
-  memoToFounderAction,
   readCollection,
   readJson,
   reviewDateForMemo,
   safeFileDate,
+  saveSavedLoop,
   type ContextSourceId,
   type FounderDiagnosis,
   type SavedMemo,
@@ -132,7 +131,7 @@ const samples: SampleLoop[] = [
 
 const sampleById = new Map(samples.map((sample) => [sample.id, sample]));
 
-function downloadClientFile(filename: string, contents: string, type: string) {
+export function downloadClientFile(filename: string, contents: string, type: string) {
   const blob = new Blob([contents], { type });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -226,19 +225,19 @@ function resultCopyForWorkflow(
       diagnosis: "The bottleneck is discovery quality, not pricing.",
       tldr: "Discovery quality, not pricing.",
       why: [
-        "The notes show pricing friction after proposal, which usually means the buyer cannot defend the business case yet.",
-        "More top-of-funnel work will not fix late-stage deals that cannot explain why now.",
-        "The founder needs direct buyer language before changing price, packaging, or volume."
+        "The notes show an open late-stage follow-up after pricing or proposal activity.",
+        "More top-of-funnel work will not resolve an account with an unclear decision owner or next step.",
+        "Founder attention should close one dated buyer decision, not add another general check-in."
       ],
       action: {
         command: "Sit in on the next two discovery calls and write down the buyer's exact words.",
-        why: "Do not pitch. Listen for the pain, business trigger, decision owner, and the phrase the buyer would use internally.",
+        why: "Use the follow-up to confirm the decision owner, unresolved objection, and next decision date.",
         doneWhen: "Two call notes are written, each with the buyer's words and the next decision step."
       },
       decision: {
         question: `Should ${subject} stay in founder-led discovery before more selling effort is added?`,
-        whatToBring: "Buyer language, pricing objection, decision owner, and next step.",
-        whatToChoose: "Keep founder-led discovery, change the sales motion, or park the account."
+        whatToBring: "Latest buyer response, unresolved objection, decision owner, and next step.",
+        whatToChoose: "Continue founder-led follow-up, delegate the account, or park it."
       }
     };
   }
@@ -367,23 +366,15 @@ function resultCopyForWorkflow(
   };
 }
 
-function memoForResult(diagnosis: FounderDiagnosis, memo: SavedMemo, selectedSampleId: string | null): SavedMemo {
-  const copy = resultCopyForWorkflow(diagnosis, selectedSampleId);
-
-  return {
-    ...memo,
-    title: copy.tldr,
-    diagnosis: copy.diagnosis,
-    recommendedDecision: copy.decision.question,
-    founderAction: copy.action.command,
-    doneWhen: copy.action.doneWhen,
-    investorSafeSummary: copy.investorSummary
-  };
-}
-
 function copyForMemo(copy: ResultCopy, memo: SavedMemo): ResultCopy {
+  const memoEvidence = memo.evidence
+    .split("\n")
+    .map((item) => item.replace(/^-\s*/, "").trim())
+    .filter(Boolean);
+
   return {
     ...copy,
+    evidence: memoEvidence,
     tldr: memo.title,
     diagnosis: memo.diagnosis,
     action: {
@@ -926,10 +917,13 @@ function SupportingContext({ copy }: { copy: ResultCopy }) {
 }
 
 const taskInputClass =
-  "w-full rounded-md border border-white/10 bg-[#071016] px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-[#d9a441] focus:ring-2 focus:ring-[#d9a441]/20";
+  "control-dark w-full rounded-md border border-white/10 bg-[#071016] px-3 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-[#d9a441] focus:ring-2 focus:ring-[#d9a441]/20";
 
 function SourceSupport({ memo }: { memo: SavedMemo }) {
   const snippets = memo.sourceSnippets ?? [];
+  const hasOnlyFallback = snippets.length > 0 && snippets.every(
+    (snippet) => snippet.reason === "Needs more concrete source context"
+  );
 
   return (
     <section data-testid="source-support" className="rounded-lg border border-white/10 bg-[#101820] p-4 shadow-dark-soft sm:p-5">
@@ -938,7 +932,9 @@ function SourceSupport({ memo }: { memo: SavedMemo }) {
           Source support
         </p>
         <p className="max-w-2xl text-sm leading-6 text-slate-400">
-          These snippets are pulled from the pasted context. They explain why this action was suggested.
+          {hasOnlyFallback
+            ? "The pasted context is too thin to support a direct source quotation."
+            : "These snippets are pulled from the pasted context. They explain why this action was suggested."}
         </p>
       </div>
       <div className="mt-4 grid gap-3">
@@ -947,7 +943,9 @@ function SourceSupport({ memo }: { memo: SavedMemo }) {
             <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[#f0c76c]">
               {snippet.reason}
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">&quot;{snippet.text}&quot;</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              {snippet.reason === "Needs more concrete source context" ? snippet.text : `"${snippet.text}"`}
+            </p>
           </article>
         ))}
       </div>
@@ -1050,7 +1048,7 @@ type NotionExportState =
   | { kind: "success"; url: string }
   | { kind: "error"; message: string };
 
-function Result({
+export function CanonicalLoopResult({
   diagnosis,
   memo,
   selectedSampleId,
@@ -1067,7 +1065,8 @@ function Result({
   onCopyReviewReminder,
   onDownloadLoopText,
   onExportToNotion,
-  onUpdateMemo
+  onUpdateMemo,
+  supplementalContent
 }: {
   diagnosis: FounderDiagnosis;
   memo: SavedMemo;
@@ -1086,6 +1085,7 @@ function Result({
   onDownloadLoopText: () => void;
   onExportToNotion: () => void;
   onUpdateMemo: (patch: Partial<SavedMemo>) => void;
+  supplementalContent?: ReactNode;
 }) {
   const generatedCopy = useMemo(() => resultCopyForWorkflow(diagnosis, selectedSampleId), [diagnosis, selectedSampleId]);
   const copy = useMemo(() => copyForMemo(generatedCopy, memo), [generatedCopy, memo]);
@@ -1129,6 +1129,8 @@ function Result({
       <Section title="Investor-safe summary">
         <p>{copy.investorSummary}</p>
       </Section>
+
+      {supplementalContent}
 
       {saved ? (
         <section
@@ -1276,8 +1278,7 @@ export function HomeLoop() {
 
     const thinkingTimer = window.setTimeout(() => {
       const nextDiagnosis = createDiagnosis(rawInput, undefined, selectedSourceId);
-      const generatedMemo = generateFounderMemo(nextDiagnosis, settings);
-      const nextMemo = memoForResult(nextDiagnosis, generatedMemo, selectedSampleId);
+      const nextMemo = generateFounderMemo(nextDiagnosis, settings);
 
       setDiagnosis(nextDiagnosis);
       setMemo(nextMemo);
@@ -1362,7 +1363,7 @@ export function HomeLoop() {
   }
 
   function updateCurrentMemo(patch: Partial<SavedMemo>) {
-    setMemo((current) => (current ? { ...current, ...patch } : current));
+    setMemo((current) => (current ? applyMemoEdits(current, patch) : current));
     setCopiedMemo(false);
     setSavedCurrentLoop(false);
     setSavedReviewDate("");
@@ -1376,15 +1377,18 @@ export function HomeLoop() {
       return;
     }
 
-    const decision = memoToDecision(memo);
-    const nextMemos = await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.memos, memo);
-    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.actions, memoToFounderAction(memo));
-    await appendCollectionItem(webLocalStorageAdapter, STORAGE_KEYS.decisions, decision);
-    setSavedMemos(nextMemos);
-    setSavedReviewDate(decision.reviewDate);
-    setSavedCurrentLoop(true);
-    setRetentionMessage("");
-    setRetentionError("");
+    try {
+      const savedLoop = await saveSavedLoop(webLocalStorageAdapter, memo);
+      setSavedMemos(savedLoop.memos);
+      setSavedReviewDate(savedLoop.records.decision.reviewDate);
+      setSavedCurrentLoop(true);
+      setRetentionMessage("");
+      setRetentionError("");
+    } catch {
+      setSavedCurrentLoop(false);
+      setRetentionMessage("");
+      setRetentionError("Could not save the complete loop locally. No complete save was confirmed.");
+    }
   }
 
   function downloadCurrentReviewCalendar() {
@@ -1465,7 +1469,7 @@ export function HomeLoop() {
 
   if (stage === "result" && diagnosis && memo) {
     return (
-      <Result
+      <CanonicalLoopResult
         diagnosis={diagnosis}
         memo={memo}
         selectedSampleId={selectedSampleId}

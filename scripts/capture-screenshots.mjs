@@ -68,7 +68,9 @@ async function main() {
       console.log("skipped 04-thinking-state.png because the thinking state completed before capture");
     }
 
-    await page.getByRole("heading", { name: "The bottleneck is discovery quality, not pricing." }).waitFor({
+    await page.getByRole("heading", {
+      name: "Revenue Rescue: the bottleneck is the unresolved next decision for FinCore Labs."
+    }).waitFor({
       state: "visible"
     });
     await page.evaluate(() => window.scrollTo(0, 0));

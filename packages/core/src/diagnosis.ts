@@ -1,6 +1,17 @@
 import { normalizeContextSourceId, type ContextSourceId } from "./contextSources";
 import { nowIsoString } from "./date";
-import type { DiagnosisConfidence, FounderDiagnosis, WorkflowDefinition, WorkflowId } from "./types";
+import {
+  missingContextForStructuredInput,
+  normalizeStructuredContext,
+  structuredEntityCandidates
+} from "./structuredContext";
+import type {
+  DiagnosisConfidence,
+  FounderDiagnosis,
+  StructuredContextField,
+  WorkflowDefinition,
+  WorkflowId
+} from "./types";
 import { getWorkflowById, WORKFLOWS } from "./workflows";
 import { normalizeText, uniqueValues } from "./validation";
 
@@ -96,7 +107,7 @@ export function extractRiskSignals(rawInput: string): string[] {
 }
 
 export function extractCompanyOrDealNames(rawInput: string): string[] {
-  const phraseMatches = rawInput.match(/\b([A-Z][A-Za-z0-9&]+(?:\s+[A-Z][A-Za-z0-9&]+){1,3})\b/g) ?? [];
+  const entityPattern = /\b([A-Z][A-Za-z0-9&.-]+(?:[ \t]+[A-Z][A-Za-z0-9&.-]+){1,3})\b/g;
   const blocked = new Set([
     "Revenue Rescue",
     "Weekly Operating",
@@ -104,22 +115,72 @@ export function extractCompanyOrDealNames(rawInput: string): string[] {
     "Onboarding Risk",
     "Hiring Bottleneck",
     "Founder Action",
-    "Decision Log"
+    "Decision Log",
+    "Final Interview",
+    "Founding Account Executive"
   ]);
+  const ignoredFieldLabels = new Set([
+    "stage",
+    "status",
+    "role",
+    "metric",
+    "date",
+    "priority",
+    "source",
+    "next step",
+    "last activity",
+    "days stuck",
+    "days in stage",
+    "owner"
+  ]);
+  const namedFieldLabels = new Set(["company", "account", "customer", "candidate", "deal", "deal name"]);
+  const blockedTailWords = new Set(["stage", "owner", "status", "role", "metric", "date", "priority", "source"]);
+  const candidates: string[] = [];
 
-  return uniqueValues(
-    phraseMatches
-      .map((item) => item.trim())
-      .filter((item) => !blocked.has(item))
-      .slice(0, 6)
-  );
+  for (const rawLine of rawInput.split(/\r?\n/)) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      continue;
+    }
+
+    const fieldMatch = line.match(/^([A-Za-z][A-Za-z ]+):\s*(.*)$/);
+    const fieldLabel = fieldMatch?.[1]?.trim().toLowerCase();
+    const searchableText = fieldLabel && namedFieldLabels.has(fieldLabel)
+      ? fieldMatch?.[2]?.trim() ?? line
+      : line;
+
+    if (fieldLabel && ignoredFieldLabels.has(fieldLabel)) {
+      continue;
+    }
+
+    const matches = searchableText.match(entityPattern) ?? [];
+
+    for (const match of matches) {
+      const words = match.trim().split(/[ \t]+/);
+
+      while (words.length > 1 && blockedTailWords.has(words[words.length - 1].toLowerCase())) {
+        words.pop();
+      }
+
+      const candidate = words.join(" ");
+
+      if (candidate.split(" ").length >= 2 && !blocked.has(candidate)) {
+        candidates.push(candidate);
+      }
+    }
+  }
+
+  return uniqueValues(candidates).slice(0, 6);
 }
 
 export function createDiagnosis(
   rawInput: string,
   forcedWorkflowId?: WorkflowId,
-  contextSource?: ContextSourceId
+  contextSource?: ContextSourceId,
+  structuredContextInput: StructuredContextField[] = []
 ): FounderDiagnosis {
+  const structuredContext = normalizeStructuredContext(structuredContextInput);
   const detected = forcedWorkflowId
     ? {
         workflow: getWorkflowById(forcedWorkflowId),
@@ -135,9 +196,13 @@ export function createDiagnosis(
     workflow: detected.workflow,
     confidence: detected.confidence,
     matchedKeywords: detected.matchedKeywords,
-    extractedCompaniesOrDeals: extractCompanyOrDealNames(rawInput),
+    extractedCompaniesOrDeals: uniqueValues([
+      ...structuredEntityCandidates(structuredContext),
+      ...extractCompanyOrDealNames(rawInput)
+    ]).slice(0, 6),
     extractedRiskSignals: extractRiskSignals(rawInput),
-    missingContext: detected.workflow.missingContext,
+    structuredContext,
+    missingContext: missingContextForStructuredInput(detected.workflow, structuredContext),
     recommendedNextStep: detected.workflow.recommendedNextStep,
     rawInput
   };

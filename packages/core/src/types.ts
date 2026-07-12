@@ -34,6 +34,12 @@ export interface WorkflowDefinition {
   ignoreThisWeek: string;
 }
 
+export interface StructuredContextField {
+  key: string;
+  label: string;
+  value: string;
+}
+
 export interface FounderDiagnosis {
   id: string;
   createdAt: string;
@@ -43,6 +49,7 @@ export interface FounderDiagnosis {
   matchedKeywords: string[];
   extractedCompaniesOrDeals: string[];
   extractedRiskSignals: string[];
+  structuredContext: StructuredContextField[];
   missingContext: string[];
   recommendedNextStep: string;
   rawInput: string;
@@ -104,6 +111,7 @@ export interface SavedFounderAction {
 export interface SavedDecision {
   id: string;
   createdAt: string;
+  sourceMemoId?: string;
   contextSource?: ContextSourceId;
   workflow: WorkflowName;
   decisionRecommended: string;

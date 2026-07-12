@@ -20,7 +20,7 @@ const statusValues: Status[] = ["Open", "In Progress", "Done", "Blocked", "Revie
 const priorityValues: Priority[] = ["Low", "Medium", "High", "Critical"];
 
 const inputClass =
-  "rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/15";
+  "control-light rounded-md border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-forest focus:ring-2 focus:ring-forest/15";
 
 export function ActionQueue() {
   const [actions, setActions] = useState<SavedFounderAction[]>([]);
@@ -67,7 +67,7 @@ export function ActionQueue() {
         <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">One action per memo</h1>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-line bg-white p-3 sm:p-4 md:grid-cols-3">
+      <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-3 sm:p-4 md:grid-cols-3">
         <select value={workflow} onChange={(event) => setWorkflow(event.target.value as WorkflowName | "All")} className={inputClass}>
           <option value="All">All workflows</option>
           {WORKFLOWS.map((item) => (
@@ -99,7 +99,7 @@ export function ActionQueue() {
       {filteredActions.length ? (
         <div className="grid gap-4">
           {filteredActions.map((action) => (
-            <article key={action.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+            <article key={action.id} data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
               <div className="grid gap-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -207,12 +207,12 @@ export function ActionQueue() {
           ))}
         </div>
       ) : actions.length ? (
-        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+        <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
           <p className="font-semibold text-ink">No founder actions match the current filters.</p>
           <p>This page keeps the one founder action saved from each memo. Clear the filters to return to the full founder action queue.</p>
         </div>
       ) : (
-        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+        <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
           <p className="font-semibold text-ink">No founder actions saved yet.</p>
           <p>This page tracks one founder action per saved memo. It is empty because no founder action has been saved on this device yet.</p>
           <p>

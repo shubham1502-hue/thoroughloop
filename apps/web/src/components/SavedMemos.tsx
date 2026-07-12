@@ -64,17 +64,17 @@ export function SavedMemos() {
         <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">Saved founder memos</h1>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-line bg-white p-3 sm:p-4 md:grid-cols-[1fr_260px]">
+      <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-3 sm:p-4 md:grid-cols-[1fr_260px]">
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search memos"
-          className="rounded-md border border-line bg-paper px-3 py-2 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15"
+          className="control-light rounded-md border border-line bg-paper px-3 py-2 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15"
         />
         <select
           value={workflow}
           onChange={(event) => setWorkflow(event.target.value as WorkflowName | "All")}
-          className="rounded-md border border-line bg-paper px-3 py-2 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15"
+          className="control-light rounded-md border border-line bg-paper px-3 py-2 outline-none focus:border-forest focus:ring-2 focus:ring-forest/15"
         >
           <option value="All">All workflows</option>
           {WORKFLOWS.map((item) => (
@@ -88,7 +88,7 @@ export function SavedMemos() {
       {filteredMemos.length ? (
         <div className="grid gap-4">
           {filteredMemos.map((memo) => (
-            <article key={memo.id} className="rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
+            <article key={memo.id} data-ui-surface="light" className="surface-light rounded-lg border border-line bg-white p-4 shadow-soft sm:p-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <h2 className="text-xl font-semibold sm:text-2xl">{memo.title}</h2>
@@ -139,12 +139,12 @@ export function SavedMemos() {
           ))}
         </div>
       ) : memos.length ? (
-        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+        <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
           <p className="font-semibold text-ink">No memos match the current filters.</p>
           <p>This page stores saved founder memos from completed diagnoses. Clear the search or workflow filter to review the saved memo library.</p>
         </div>
       ) : (
-        <div className="grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
+        <div data-ui-surface="light" className="surface-light grid gap-3 rounded-lg border border-line bg-white p-6 text-muted">
           <p className="font-semibold text-ink">No memos saved yet.</p>
           <p>This page stores founder memos after a diagnosis is generated. It is empty because no memo has been saved on this device yet.</p>
           <p>
