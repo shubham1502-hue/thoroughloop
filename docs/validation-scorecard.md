@@ -51,6 +51,20 @@ This snapshot tracks early LinkedIn outreach replies. It is not founder validati
 | --- | --- | --- | --- | --- |
 |  |  |  |  |  |
 
+## Observed pilot measures
+
+Fill these from completed observation logs and record the product version and workflow for each cohort.
+
+| Measure | Numerator or measured value | Denominator | Evidence notes |
+| --- | --- | --- | --- |
+| Unassisted first-loop completions | | Eligible starters | First run per participant |
+| Unassisted completions within five minutes | | Eligible starters | Compare to the usability gate |
+| Median time to first value | | Number of unassisted completers | Use elapsed minutes from composer start |
+| Sessions stopped before both items were saved | | Eligible starters | List last observed steps and reasons |
+| Confirmed repeat reviews on days 7 to 14 | | First-loop completers with elapsed follow-up windows | Track confirmed missed reviews and unknown outcomes alongside confirmed reviews |
+
+The [pilot protocol](founder-validation-plan.md#observed-pilot) defines the observation and decision rules. Use the aggregate counts to decide which workflow step to retest.
+
 ## Strong Signals
 
 | Signal | Count | Evidence Notes | Related Use Case |
