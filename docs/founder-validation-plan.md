@@ -67,6 +67,21 @@ This is enough for directional learning, not statistical validation. The goal is
 6. Show the action and decision, then ask whether this would help them close the loop next week.
 7. Ask what felt useful, what felt wrong, and which workflow they would test first.
 
+## Observed pilot
+
+Recruit at least five eligible founders or operators for the same workflow in the first cohort. Ask each participant to use a fictional sample or non-sensitive context they can share. Observe the first run without showing the steps. Start timing when they begin using the composer. Stop when both a founder action and a decision with a review date are saved.
+
+| Measure | Definition | Decision evidence |
+| --- | --- | --- |
+| First-loop completion | Starters who save both items without help divided by all eligible starters. Count each participant once. | Record the first step at which the participant needed help or stopped. |
+| Time to first value | Elapsed minutes from starting the composer to saving both items. Report the median and the number of unassisted completers. | Record whether the completed loop arrived within five minutes. Keep stopped and timed-out sessions in the completion denominator. |
+| Abandonment | Started sessions that end before both items are saved. | Log the last observed step and the participant's reason when they share it. Use unknown for an unobserved reason. |
+| Repeat review | Participants who reopen the same decision and can describe a next step on days 7 to 14, divided by first-loop completers whose follow-up window has elapsed. | Use the same browser for the local record. Record confirmed review, confirmed missed review, or unknown separately. |
+
+Use the [validation log](validation-log-template.md) for private session records and the [scorecard](validation-scorecard.md) for aggregate counts. Notes should contain an anonymous participant code, product version, sample type, time and outcome, and a paraphrased observation. Keep raw pasted material and private contact details out of the product evidence record.
+
+For the first cohort, use four of five starters completing the loop without help within five minutes as the usability gate. If the cohort misses the gate, review the first recurring stall and retest that step. Once at least five completers are eligible for repeat review, use three confirmed reviews per five eligible participants as the follow-up gate. If the first loop works and repeat review falls short, test whether the saved decision and review prompt support a real follow-up. Review the numerator, denominator, and unknowns before applying either gate.
+
 ## Strong Signals
 
 - The founder names a real recent situation where the loop would have helped.
